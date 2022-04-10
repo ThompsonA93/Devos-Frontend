@@ -31,5 +31,5 @@ def new_proposal():
     form = ProposalForm()
     if form.validate_on_submit():
         flash('Your Proposal has been created!', 'successful')
-        return redirect(url_for('gv.gview'))
+        return redirect(url_for('gv.governance'))
     return render_template('create_proposal.html', title="Create Proposal", form=form, legend='Create a new Proposal')

@@ -10,6 +10,6 @@ class ProposalForm(FlaskForm):
 
     # TODO :: Refactor to show logged-in address
     #creatorID = StringField('Title', validators=[DataRequired()])
-
+    
     submit = SubmitField('Publish Proposal')
 

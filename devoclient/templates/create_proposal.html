@@ -39,9 +39,16 @@
                 {% endif %}
             </div>
         </fieldset>
+
         <div class="form-group">
             {{ form.submit(class="btn btn-outline-info") }}
         </div>
+        
+        <div>
+            <a class="btn btn-primary" id=".createContract" onclick="createContract()" href="#" role="button">Create Contract</a>
+        </div>
     </form>
 </div>
+<script src="{{ url_for('static', filename='js/createContract.js') }}"></script>
+
 {% endblock %}

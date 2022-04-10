@@ -12,5 +12,9 @@
         <li id="metamaskInstalled"> </li>
         <li id="chainInfo"> </li>
     </ul>
-    
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/web3detector.js') }}"></script>
+
 {% endblock %}
