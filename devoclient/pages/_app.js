@@ -1,19 +1,24 @@
-import 'bootstrap/dist/css/bootstrap.css'
-import '../styles/globals.css'
-
+import Head from 'next/head'
 import Layout from '../components/layout'
-import { useEffect } from 'react'
+
+import '../styles/globals.css'
+import 'bulma/css/bulma.css'
+
 
 function MyApp({ Component, pageProps }) {
-  // Workaround for Bootstrap given missing window/document objects. TODO :: Find workaround
-  useEffect (() => {
-    import ("bootstrap/dist/js/bootstrap")
-  })
 
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
+    <>
+      <div>
+        <Head>
+          <title>DevoClient</title>
+          <meta name='description' content='Devos Web3-Frontend' />
+        </Head>
+      </div>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </>
   )
 }
 

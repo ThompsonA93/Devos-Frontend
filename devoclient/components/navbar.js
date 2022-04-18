@@ -1,35 +1,35 @@
+import { useState } from 'react';
 import Link from 'next/link'
-import { useEffect, useState } from 'react';
+import connectWalletHandler from '../w3/WalletHandler';
+
 
 const Navbar = () => {
-
-  
-
   return (
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Eighth navbar example">
-      <div class="container">
-        <a class="navbar-brand">DeVoS</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample07" aria-controls="navbarsExample07" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarsExample07">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <Link href="/"><a class="nav-link active" aria-current="page">Home</a></Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/governance"><a class="nav-link">Governance</a></Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/proposals"><a class="nav-link">Proposals</a></Link>
-            </li>
-            <li class="nav-item">
-              <Link href="/about"><a class="nav-link">About</a></Link>
-            </li>
-          </ul>
-          <div>
-            <button onClick={connectWalletHandler} className="button is-primary">Connect Wallet</button>
-          </div>
+    <nav className='navbar m-4'>
+      <div className='container'>
+        <div className='navbar-brand mx-5'>
+          <h1>DeVoS</h1>
+        </div>
+        <div className='navbar-start'>
+          <Link href="/"><a className="navbar-item">
+              Home
+          </a></Link>
+
+          <Link href="/governance"><a className="navbar-item">
+              Governance
+          </a></Link>
+
+          <Link href="/proposals"><a className="navbar-item">
+              Proposals
+          </a></Link>
+
+          <Link href="/help"><a className="navbar-item">
+              Help
+          </a></Link>
+
+        </div>
+        <div className='navbar-end mx-5'>
+          <button onClick={connectWalletHandler} className='button is-link'>Connect Wallet</button>
         </div>
       </div>
     </nav>

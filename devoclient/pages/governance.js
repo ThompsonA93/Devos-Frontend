@@ -31,30 +31,30 @@ const Governance = () => {
                     </ul>
                 </div>
                 <div>
-                    <div class="btn-group">
+                    <div className="btn-group">
                         <a href="/">
-                            <button class="btn rounded m-1 gbtn-blue gbtn-transit">
-                                <h4 class="pt-1">Create new Proposal</h4>
+                            <button className="btn rounded m-1 gbtn-blue gbtn-transit">
+                                <h4 className="pt-1">Create new Proposal</h4>
                                 <p>Create a new proposal to the community.</p>
                             </button>
                         </a>
                         <a href="/">
-                            <button class="btn rounded m-1 gbtn-yellow gbtn-transit">
-                                <h4 class="pt-1">Show all proposals </h4>
+                            <button className="btn rounded m-1 gbtn-yellow gbtn-transit">
+                                <h4 className="pt-1">Show all proposals </h4>
                                 <p>Looking for some other proposal? View here.</p>
                             </button>
                         </a>
                     </div>
-                    <div class="btn-group">
+                    <div className="btn-group">
                         <a href="/">
-                            <button class="btn rounded m-1 gbtn-green gbtn-transit ">
-                                <h4 class="pt-1">Help </h4>
+                            <button className="btn rounded m-1 gbtn-green gbtn-transit ">
+                                <h4 className="pt-1">Help </h4>
                                 <p>Need help? Click this!</p>
                             </button>
                         </a>
                         <a href="/">
-                            <button href class="btn rounded m-1 gbtn-red gbtn-transit">
-                                <h4 class="pt-1">Report an error </h4>
+                            <button href className="btn rounded m-1 gbtn-red gbtn-transit">
+                                <h4 className="pt-1">Report an error </h4>
                                 <p>Found something odd? Contact us.</p>
                             </button>
                         </a>
