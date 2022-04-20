@@ -1,8 +1,10 @@
 import Head from 'next/head'
-import Layout from '../components/layout'
+import Layout from '../component/Layout'
+import W3ContextProvider from '../context/W3Context'
 
 import '../styles/globals.css'
 import 'bulma/css/bulma.css'
+import PollContextProvider from '../context/PollContext'
 
 
 function MyApp({ Component, pageProps }) {
@@ -15,9 +17,13 @@ function MyApp({ Component, pageProps }) {
           <meta name='description' content='Devos Web3-Frontend' />
         </Head>
       </div>
-      <Layout>
-        <Component {...pageProps} />
-      </Layout>
+      <W3ContextProvider>
+        <PollContextProvider>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </PollContextProvider>
+        </W3ContextProvider>
     </>
   )
 }

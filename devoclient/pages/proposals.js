@@ -1,7 +1,11 @@
+import Link from "next/link";
+
 const Proposals = () => {
     return (
         <div>
-            <h1>About the Proposals</h1>
+        <Link href="/proposals/newProposal">
+          <a>Create new Proposal</a>
+        </Link>
         </div>
     )
 }

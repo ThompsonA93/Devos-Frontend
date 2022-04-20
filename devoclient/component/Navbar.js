@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import Link from 'next/link'
-import connectWalletHandler from '../w3/WalletHandler';
+import { W3Context } from '../context/W3Context';
 
 
 const Navbar = () => {
+  const { connect } = useContext(W3Context);
+
   return (
-    <nav className='navbar m-4'>
+    <nav className='navbar m-4 is-tab is-expanded'>
       <div className='container'>
         <div className='navbar-brand mx-5'>
           <h1>DeVoS</h1>
@@ -29,7 +31,7 @@ const Navbar = () => {
 
         </div>
         <div className='navbar-end mx-5'>
-          <button onClick={connectWalletHandler} className='button is-link'>Connect Wallet</button>
+          <button onClick={connect} className='button is-link'>Connect Wallet</button>
         </div>
       </div>
     </nav>
