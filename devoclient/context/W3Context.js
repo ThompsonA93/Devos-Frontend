@@ -7,11 +7,13 @@ const W3ContextProvider = (props) => {
     const [web3, setWeb3] = useState(null)
     const [address, setAddress] = useState(null)
 
+    // Refactor local storage
     const connect = async () => {
         console.log("W3Context::Connecting to Web3.")
 
         await window.ethereum.request({ method: "eth_requestAccounts" });
 
+        
         web3 = new Web3(window.ethereum);
         setWeb3(web3);
         console.log("Web3 Instance: " + web3);
