@@ -1,34 +1,29 @@
-import { useEffect } from 'react'
 import PollList from '../component/PollList'
-import styles from '../styles/Home.module.css'
+import W3List from '../component/W3List'
 
-export default function Home() {
-
+const Home = () => {
   return (
-    <div className='container'>
-      <section className="section">
-        <h2 className="subtitle">Welcome back, User</h2>
-        <div>Latest Polls</div>
-        <PollList />
-      </section>
-
-      <section className="section">
-        <h2 className="subtitle">System Diagnostics</h2>
-        <div className="columns">
-          <div className="column">
-            ETH-Mainnet
-          </div>
-          <div className="column">
-            ETH-Goerli
-          </div>
-          <div className="column">
-            ETH-Rinkeby
-          </div>
-          <div className="column">
-            LocalChain
-          </div>
+    <div>
+      <section className="hero is-small has-background-grey">
+        <div className="hero-body">
+          <p className="title has-text-white">
+            Home
+          </p>
         </div>
       </section>
+      <div className='container'>
+        <section className="section">
+          <h2 className="subtitle">Welcome back</h2>
+          <h3>Latest Polls</h3>
+          <PollList />
+        </section>
+        <section className="section">
+          <h2 className="subtitle">System Pulse</h2>
+          <W3List />
+        </section>
+      </div>
     </div>
   )
 }
+
+export default Home;

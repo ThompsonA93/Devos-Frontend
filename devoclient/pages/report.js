@@ -1,20 +1,20 @@
-import NewPollForm from "../../component/PollForm";
-
-const newProposal = () => {
+const Report = () => {
     return (
         <div>
             <section className="hero is-small has-background-grey">
                 <div className="hero-body">
                     <p className="title has-text-white">
-                        Create a new Proposal
+                        Report an Error
                     </p>
                 </div>
             </section>
-            <div className="container">
-                <NewPollForm />
+            <div className='container'>
+                <section className="section">
+                    <h2 className="subtitle">Report an error in the app</h2>
+                </section>
             </div>
         </div>
     )
 }
 
-export default newProposal;
+export default Report;

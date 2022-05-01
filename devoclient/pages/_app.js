@@ -8,7 +8,6 @@ import PollContextProvider from '../context/PollContext'
 
 
 function MyApp({ Component, pageProps }) {
-
   return (
     <>
       <div>
@@ -23,9 +22,9 @@ function MyApp({ Component, pageProps }) {
             <Component {...pageProps} />
           </Layout>
         </PollContextProvider>
-        </W3ContextProvider>
+      </W3ContextProvider>
     </>
   )
 }
 
-export default MyApp
+export default MyApp;

@@ -1,5 +1,4 @@
-## Work in Progress
-### Todo
+# TODO
 - [ ] Setup Interface to User
 - [ ] Setup Interface to Blockchain
 - [ ] Enable Voting
@@ -10,9 +9,5 @@
   - [ ] Software
   - [ ] Security
 
-### In Progress
-
-- [ ] Setup Interface to User
-
-### Done 
+# FINISHED
 
