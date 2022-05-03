@@ -10,9 +10,7 @@ const W3List = () => {
             <h3>Network reconfiguration</h3>
             <W3Config />
         </div>
-        
     )
-
 }
 
 export default W3List;
