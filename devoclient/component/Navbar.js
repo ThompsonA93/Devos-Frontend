@@ -37,8 +37,6 @@ const Navbar = () => {
           </p>
         </div>
       </div>
-
-
     </nav>
   )
 }

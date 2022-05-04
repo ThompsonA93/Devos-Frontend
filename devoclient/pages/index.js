@@ -1,5 +1,6 @@
 import PollList from '../component/PollList'
-import W3List from '../component/W3List'
+import ConfigDetails from '../component/ConfigDetails';
+import ConfigForm from '../component/ConfigForm';
 
 const Home = () => {
   return (
@@ -19,7 +20,8 @@ const Home = () => {
         </section>
         <section className="section">
           <h2 className="subtitle">System Pulse</h2>
-          <W3List />
+            <ConfigDetails />
+            <ConfigForm />
         </section>
       </div>
     </div>

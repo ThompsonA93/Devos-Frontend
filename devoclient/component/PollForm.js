@@ -4,7 +4,7 @@ import { W3Context } from '../context/W3Context';
 
 const NewPollForm = () => {
     const { createPoll } = useContext(PollContext);
-    const { getAddress, deployToChain } = useContext(W3Context);
+    const { address, deployBallotToChain } = useContext(W3Context);
 
     const [title, setTitle] = useState('');
     const [metainfo, setMetainfo] = useState('');
@@ -13,14 +13,16 @@ const NewPollForm = () => {
     const submitHandler = (e) => {
         e.preventDefault(); // Avoid reloading
 
-        var creator = getAddress();
-        createPoll(creator, title, metainfo, votingDays);
-        deployToChain(title, metainfo, votingDays);
-
-        // Reset data to default
-        setTitle('');
-        setMetainfo('');
-        setVotingDays('');
+        if(address){
+            createPoll(address, title, metainfo, votingDays);
+            deployBallotToChain(title, metainfo, votingDays);
+    
+            // Reset data to default
+            setTitle(''); setMetainfo(''); setVotingDays('');
+        }else{
+            console.log("User is not logged in to MetaMask")
+            alert("Please log in to MetaMask to publish a new Poll");
+        }
     }
 
     return (
@@ -56,23 +58,9 @@ const NewPollForm = () => {
                 <div className="control">
                     <button className="button is-link">Submit</button>
                 </div>
-                <div className="control">
-                    <button className="button is-link is-light">Cancel</button>
-                </div>
             </div>
         </form>
     )
 }
 
 export default NewPollForm;
-
-
-/** Kept for reference
-            <input type="text" placeholder='Poll title' value={title}
-                onChange={(e) => setTitle(e.target.value)} required />
-            <input type="text" placeholder='Description' value={metainfo}
-                onChange={(e) => setMetainfo(e.target.value)} required />
-            <input type="text" placeholder='Voting Days' value={votingDays}
-                onChange={(e) => setVotingDays(e.target.value)} required />
-            <input type="submit" value="Create Proposal" />
- */
