@@ -1,3 +1,3 @@
 #!/bin/bash
-cd ./devoclient
+cd devoclient
 npm run dev

@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { useRouter } from 'next/router';
 import { PollContext } from '../../context/PollContext';
+import { W3Context } from '../../context/W3Context';
 
 const Proposal = () => {
     const { polls } = useContext(PollContext);
