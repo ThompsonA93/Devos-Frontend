@@ -13,7 +13,7 @@ const Proposals = () => {
       <div className='container'>
         <section className="section">
           <h2 className="subtitle">Overview of all proposals</h2>
-          <PollList />
+          <PollList /> {/* TODO :: Add pagination over every readable SC */}
         </section>
       </div>
     </div>

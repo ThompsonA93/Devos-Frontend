@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PollList from '../component/PollList'
 
 const Governance = () => {
     return (
@@ -40,13 +41,13 @@ const Governance = () => {
             </div>
             <div className="container mt-5">
                 <h2 className="subtitle">Total Proposals</h2>
-                <p> Fetching ...</p>
-
+                <PollList /> {/* TODO :: Add pagination*/}
+                
                 <h2 className="subtitle">Running Proposals</h2>
-                <p> Fetching ...</p>
+                <PollList /> {/* TODO :: Add pagination over running*/}
 
                 <h2 className="subtitle">Completed Proposals</h2>
-                <p> Fetching ...</p>
+                <PollList /> {/* TODO :: Add pagination over finished*/}
             </div>
         </div>
     )
