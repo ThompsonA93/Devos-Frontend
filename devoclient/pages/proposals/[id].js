@@ -4,12 +4,13 @@ import { PollContext } from '../../context/PollContext';
 import { W3Context } from '../../context/W3Context';
 
 const Proposal = () => {
-    const { polls } = useContext(PollContext);
+    const { totalPolls } = useContext(PollContext);
     const router = useRouter();
 
     return (
-        polls.map(poll => {
+        totalPolls.map(poll => {
             if (poll.id == router.query.id) {
+                console.log("Rendering Ballot" + poll.id + " - " + poll.title);
                 return (
                     <div>
                         <section className="hero is-small has-background-grey">

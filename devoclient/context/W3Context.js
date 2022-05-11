@@ -1,13 +1,23 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import { ethers, BigNumber, ContractFactory } from 'ethers';
 import ballotOpen from '../artifacts/contracts/BallotOpen.sol/BallotOpen.json';
-
+import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchive.json';
 
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
-    const [address, setAddress] = useState('')              // Client Wallet
-    const [archive, setArchive] = useState("0xd223f3F15a0E4992D1D83C3d4B8fD3bf0Ba2cBD6")              // Predeployed Archive SC = required
+    const [address, setAddress] = useState()              // Client Wallet
+    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E")              // Predeployed Archive SC = required
+    // 0xd223f3F15a0E4992D1D83C3d4B8fD3bf0Ba2cBD6
+
+    // FIXME :: EXPERIMENTAL SETUP :: Store address => Pass to PollList
+    const [totalVotums, setTotalVotums] = useState([]);
+    
+    useEffect(() => {
+        // On Address-change, update polls
+        console.log("Detected change on Address. Reloading Votums from Archive")
+        readBallotsFromChain();
+    }, [address]); 
 
 
     // TODO :: Refactor to local storage
@@ -16,7 +26,9 @@ const W3ContextProvider = (props) => {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
-            setAddress(accounts[0]);
+            const address = ethers.utils.getAddress(accounts[0]);
+            console.log("User detected: " + address);               
+            setAddress(address);
         }
     }
 
@@ -30,29 +42,30 @@ const W3ContextProvider = (props) => {
                 signer
             );
 
-            // constructor(address _archiveAddress, string memory _title, string memory _metainfo, uint _votingDays)
             const contract = await scFactory.deploy(archive, title, metainfo, BigNumber.from(votingDays));
 
             console.log("New ballot deployed to " + contract.address);
             // Example Ballots located at
-            // 0xC2a813698E74845E0A787c466C8F6b158C2A3958
+            // 0xdC6F62cbEd4EfB913B76Db309E0195320e6B0311
+            readBallotsFromChain();
         }
     }
 
+    // FIXME :: Copy Chain-Data: Is there a better way?
     const readBallotsFromChain = async () => {
         console.log("Reading from Archive-Node");
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
-            
             const contract = await new ethers.Contract(
                 archive, 
-                ballotOpen.abi,
+                ballotArchive.abi,
                 provider
             );
             
-            let ballots = await contract.ballots;
+            var ballots = await contract.getAllBallots();
+            setTotalVotums(ballots);
+            console.log("Received Ballots: " + totalVotums);
         }
-        
     }
 
 
@@ -85,7 +98,7 @@ const W3ContextProvider = (props) => {
 
 
     return (
-        <W3Context.Provider value={{ address, archive, connect, setArchive, deployBallotToChain, readBallotDataFromAddress }}>
+        <W3Context.Provider value={{ address, archive, connect, setArchive, totalVotums, deployBallotToChain, readBallotDataFromAddress }}>
             {props.children}
         </W3Context.Provider>
     )

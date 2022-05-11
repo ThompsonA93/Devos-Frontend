@@ -3,7 +3,6 @@ import { PollContext } from '../context/PollContext';
 import { W3Context } from '../context/W3Context';
 
 const NewPollForm = () => {
-    const { createPoll } = useContext(PollContext);
     const { address, deployBallotToChain } = useContext(W3Context);
 
     const [title, setTitle] = useState('');
@@ -14,7 +13,6 @@ const NewPollForm = () => {
         e.preventDefault(); // Avoid reloading
 
         if(address){
-            createPoll(address, title, metainfo, votingDays);
             deployBallotToChain(title, metainfo, votingDays);
     
             // Reset data to default

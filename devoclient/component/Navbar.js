@@ -28,7 +28,7 @@ const Navbar = () => {
       <div className='navbar-end'>
         <div className='navbar-item'>
           <p className='control'>
-            <a href={`https://etherscan.io/address/${address}`} target="_blank" className='button is-white'>{address}</a> 
+            <a href={`https://rinkeby.etherscan.io/address/${address}`} target="_blank" className='button is-white'>{address}</a> 
           </p>
         </div>
         <div className='navbar-item'>
