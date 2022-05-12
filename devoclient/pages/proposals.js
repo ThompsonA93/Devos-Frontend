@@ -1,4 +1,3 @@
-import PollListTotal from '../component/PollListTotal';
 
 const Proposals = () => {
   return (
@@ -13,7 +12,9 @@ const Proposals = () => {
       <div className='container'>
         <section className="section">
           <h2 className="subtitle">Overview of all proposals</h2>
+          {/*
           <PollListTotal />
+          */}
         </section>
       </div>
     </div>

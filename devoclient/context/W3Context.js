@@ -6,12 +6,72 @@ import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchiv
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
-    const [address, setAddress] = useState('')              // Client Wallet
-    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E")              // Predeployed Archive SC = required
-    // 0xd223f3F15a0E4992D1D83C3d4B8fD3bf0Ba2cBD6
+    const [address, setAddress] = useState('')
+    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E")
 
-    const [totalVotums, setTotalVotums] = useState([]);
-    
+    const [totalSCVotums, setTotalSCVotums] = useState([]);
+    //const [localBallots, setLocalBallots] = useState([]);
+    const [singleBallotData, setSingleBallotData] = useState([]);
+
+    useEffect(() => {
+        console.log("W3Context::UseEffect on Address " + address);
+        readBallotsFromChain();
+        convertBallotData();
+    }, [address]);
+
+    /*
+    useEffect(() => {
+        setLocalBallots(...localBallots, singleBallotData);
+        console.log("Updated Local Ballot List: " + localBallots);
+    }, [singleBallotData]);
+    */
+    /**************************************/
+    /* Local Blockchain-Related           */
+    /**************************************/
+
+    const convertBallotData = async () => {
+        console.log("\tNumber of Polls: " + totalSCVotums.length);
+        for (var i = 0; i < totalSCVotums.length; i++) {
+            console.log("\tWorking on: #" + i + " - " + totalSCVotums[i]);
+
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const contract = await new ethers.Contract(
+                totalSCVotums[i],
+                ballotOpen.abi,
+                provider
+            );
+            var _creator = await contract.creator();
+            var _title = await contract.title();
+            var _metainfo = await contract.metainfo();
+            var _startTime = await contract.startTime();
+            var _endTime = await contract.endTime();
+            var _totalVotes = await contract.totalVotes();
+            var _proVotes = await contract.proVotes();
+            var _startDate = new Date(_startTime * 1000).toLocaleString();
+            var _endDate = new Date(_endTime * 1000).toLocaleString();
+            console.log("\tReceived Ballot Data: #" + i + "\n\tCreator: " + _creator + "\n\tTitle:" + _title + "\n\tMetainfo:" + _metainfo + "\n\tTime:" + _startDate + " -- " + _endDate + "\n\tVotes: " + _totalVotes + "/" + _proVotes);
+            
+            /*
+            setBallotData(...singleBallotData, 
+                JSON.stringify({id: new Number(i), 
+                    title: new String(_title), 
+                    creator: new String(_creator), 
+                    metainfo: new String(_metainfo), 
+                    startDate: new Date(_startDate), 
+                    endDate: new Date(_endDate), 
+                    totalVotes: new Number(_totalVotes), 
+                    proVotes: new Number(_proVotes) })
+                );
+            */
+            setSingleBallotData(...singleBallotData, [{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
+
+            console.log("Allocated Ballot data: " + singleBallotData.length + " : " + singleBallotData);
+            //console.log("\tLocally allocated Ballot data: IT:" + singleBallotData[i] + "\n\tCreator: " + singleBallotData[i] + "\n\tTitle:" + singleBallotData.title + "\n\tMetainfo:" + singleBallotData.metainfo + "\n\tTime:" + singleBallotData.startDate + " -- " + singleBallotData.endDate + "\n\tVotes: " + singleBallotData.totalVotes + "/" + singleBallotData.proVotes);
+            //setBallotData([{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
+            //localStorage.setItem('ballot', JSON.stringify(i, _creator, _title, _metainfo, _startDate, _endDate, _totalVotes, _proVotes));
+        }
+    }
+
     // TODO :: Refactor to local storage
     const connect = async () => {
         if (window.ethereum) {
@@ -19,7 +79,7 @@ const W3ContextProvider = (props) => {
                 method: "eth_requestAccounts",
             });
             const address = ethers.utils.getAddress(accounts[0]);
-            console.log("User detected: " + address);               
+            console.log("User detected: " + address);
             setAddress(address);
         }
         console.log("\tChange in Address: " + address);
@@ -45,19 +105,21 @@ const W3ContextProvider = (props) => {
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const contract = await new ethers.Contract(
-                archive, 
+                archive,
                 ballotArchive.abi,
                 provider
             );
-            
+
             var ballots = await contract.getAllBallots();
-            setTotalVotums(ballots);
-            console.log("\tReceived Ballots: " + totalVotums);
+            setTotalSCVotums(ballots);
+            console.log("\tReceived Ballots: " + totalSCVotums);
+
+
         }
     }
 
     return (
-        <W3Context.Provider value={{ address, archive, connect, setArchive, totalVotums, deployBallotToChain }}>
+        <W3Context.Provider value={{ address, archive, localBallots, connect, setArchive, totalSCVotums, deployBallotToChain }}>
             {props.children}
         </W3Context.Provider>
     )

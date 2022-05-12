@@ -1,14 +1,13 @@
 import React, { useContext } from 'react';
 import { useRouter } from 'next/router';
-import { PollContext } from '../../context/PollContext';
 import { W3Context } from '../../context/W3Context';
 
 const Proposal = () => {
-    const { totalPolls } = useContext(PollContext);
+    const { ballotData } = useContext(W3Context);
     const router = useRouter();
 
     return (
-        totalPolls.map(poll => {
+        ballotData.map(poll => {
             if (poll.id == router.query.id) {
                 console.log("Rendering Ballot" + poll.id + " - " + poll.title);
                 return (

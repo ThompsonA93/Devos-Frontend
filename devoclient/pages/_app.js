@@ -4,7 +4,6 @@ import W3ContextProvider from '../context/W3Context'
 
 import '../styles/globals.css'
 import 'bulma/css/bulma.css'
-import PollContextProvider from '../context/PollContext'
 import RemoteAPIContextProvider from '../context/RemoteAPIContext'
 
 
@@ -18,13 +17,11 @@ function MyApp({ Component, pageProps }) {
         </Head>
       </div>
       <W3ContextProvider>
-        <PollContextProvider>
           <RemoteAPIContextProvider>
             <Layout>
               <Component {...pageProps} />
             </Layout>
           </RemoteAPIContextProvider>
-        </PollContextProvider>
       </W3ContextProvider>
     </>
   )

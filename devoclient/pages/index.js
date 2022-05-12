@@ -1,6 +1,6 @@
-import PollListUser from '../component/PollListUser'
 import ConfigDetails from '../component/ConfigDetails';
 import ConfigForm from '../component/ConfigForm';
+import PollList from '../component/PollList';
 
 const Home = () => {
   return (
@@ -16,7 +16,10 @@ const Home = () => {
         <section className="section">
           <h2 className="subtitle">Welcome back</h2>
           <h3>Your latest Polls</h3>
-          <PollListUser />
+          {/*
+            <PollListUser />
+          */}
+          <PollList />
         </section>
         <section className="section">
           <h2 className="subtitle">System Pulse</h2>

@@ -1,7 +1,5 @@
 import Link from 'next/link'
-import PollListTotal from '../component/PollListTotal';
-import PollListRunning from '../component/PollListRunning';
-import PollListComplete from '../component/PollListComplete';
+import PollList from '../component/PollList';
 
 const Governance = () => {
     return (
@@ -43,13 +41,18 @@ const Governance = () => {
             </div>
             <div className="container mt-5">
                 <h2 className="subtitle">Total Proposals</h2>
-                <PollListTotal />
+                <PollList />
                 
                 <h2 className="subtitle">Running Proposals</h2>
-                <PollListRunning />
+                {/* 
+                    <PollListRunning />
+                */}
 
                 <h2 className="subtitle">Completed Proposals</h2>
-                <PollListComplete />
+                {/*
+                    <PollListComplete />
+                */}
+        
             </div>
         </div>
     )
