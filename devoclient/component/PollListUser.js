@@ -2,14 +2,13 @@ import React, { useContext } from 'react';
 import { PollContext } from '../context/PollContext';
 import PollDetails from './PollDetails';
 
-const PollList = () => {
-    const { totalPolls, runningPolls, completedPolls, userPolls } = useContext(PollContext);
+const PollListUser = () => {
+    const { userPolls } = useContext(PollContext);
 
-    // {votumsIndex, title, creator, metainfo, startDate, endDate, totalVotes, proVotes }
     return (
         <dl className='m-4'>
             {userPolls.map(poll => {
-                console.log("Ballot: " + poll.id + " | " + poll.title);
+                console.log("\t User Ballot: " + poll.id + " | " + poll.title);
                 return (
                     <PollDetails poll={poll} key={poll.id} />
                 )
@@ -18,4 +17,4 @@ const PollList = () => {
     )
 }
 
-export default PollList;
+export default PollListUser;

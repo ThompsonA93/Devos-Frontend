@@ -1,4 +1,4 @@
-import PollList from '../component/PollList'
+import PollListTotal from '../component/PollListTotal';
 
 const Proposals = () => {
   return (
@@ -13,7 +13,7 @@ const Proposals = () => {
       <div className='container'>
         <section className="section">
           <h2 className="subtitle">Overview of all proposals</h2>
-          <PollList /> {/* TODO :: Add pagination over every readable SC */}
+          <PollListTotal />
         </section>
       </div>
     </div>

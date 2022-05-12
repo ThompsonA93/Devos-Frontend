@@ -25,7 +25,7 @@ const Proposal = () => {
                             <h2 className="subtitle">by {poll.creator}</h2>
                             <div className='section'>
                                 {poll.metainfo}
-                                <div className='mt-5'>Voting ends in {poll.votingDays} days</div>
+                                <div className='mt-5'>Voting ends on {poll.endDate} days</div>
                             </div>
                             <div className="field is-grouped">
                                 <p className="control">

@@ -1,4 +1,4 @@
-import PollList from '../component/PollList'
+import PollListUser from '../component/PollListUser'
 import ConfigDetails from '../component/ConfigDetails';
 import ConfigForm from '../component/ConfigForm';
 
@@ -15,8 +15,8 @@ const Home = () => {
       <div className='container'>
         <section className="section">
           <h2 className="subtitle">Welcome back</h2>
-          <h3>Latest Polls</h3>
-          <PollList />
+          <h3>Your latest Polls</h3>
+          <PollListUser />
         </section>
         <section className="section">
           <h2 className="subtitle">System Pulse</h2>
