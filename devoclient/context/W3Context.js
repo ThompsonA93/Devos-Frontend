@@ -18,13 +18,19 @@ const W3ContextProvider = (props) => {
         console.log("W3Context::UseEffect on Address " + address);
         readBallotsFromChain();
         convertBallotData();
-        
+        console.log("\tCollected Blochchain information " + address);
     }, [address]);
 
     useEffect(() => {
-        console.log("UseEffect::Conversion");
-        setLocalBallots([...localBallots, ballotInfo]);
-        console.log("UseEffect::Update " + localBallots);
+        console.log("W3Context::UseEffect on ballotInfo " + ballotInfo);
+        if(ballotInfo.id === undefined){    // Disregard misallocated objects; Not sure where those come from
+            console.log("BallotInfo is Undefined!");
+        }else if(localBallots[ballotInfo.id]){ // Check if Id already exists ; FIXME: Handled correctly?
+            console.log("Ballot " + ballotInfo.id + " already allocated.");
+        }else{  // Allocate if ID valid & not existing
+            setLocalBallots([...localBallots, ballotInfo]);
+        }
+        console.log("\tUpdating local Ballots " + localBallots);
     }, [ballotInfo])
 
 
@@ -75,6 +81,7 @@ const W3ContextProvider = (props) => {
             var _endTime = ""+ await contract.endTime();
             var _totalVotes = ""+ await contract.totalVotes();
             var _proVotes = ""+ await contract.proVotes();
+            
             var _startDate = ""+ new Date(_startTime * 1000).toLocaleString();
             var _endDate = ""+ new Date(_endTime * 1000).toLocaleString();
 
