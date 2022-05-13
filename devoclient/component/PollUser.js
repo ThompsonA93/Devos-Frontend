@@ -2,14 +2,14 @@ import React, { useContext } from 'react';
 import { W3Context } from '../context/W3Context';
 import PollDetails from './PollDetails';
 
-const PollList = () => {
-    const { localBallots } = useContext(W3Context);
+const PollUser = () => {
+    const { address, localBallots } = useContext(W3Context);
 
     return (
         <dl className='m-4'>
             {localBallots.map(poll => {
-                console.log("\tRendering Ballot: " + poll.id + " | " + poll.title);
-                return poll.id >= 0 ? (
+                console.log("\tCheck to render user ballot: \n\t" + poll.id + " || "+ poll.creator +  ":" + address);
+                return poll.creator === address ? (
                     <PollDetails poll={poll} key={poll.id} />
                 ) : (
                     <></>
@@ -19,4 +19,4 @@ const PollList = () => {
     )
 }
 
-export default PollList;
+export default PollUser;

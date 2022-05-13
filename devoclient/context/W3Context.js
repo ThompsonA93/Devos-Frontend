@@ -6,18 +6,16 @@ import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchiv
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
-    const [address, setAddress] = useState('')
-    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E")
+    const [address, setAddress] = useState('');
+    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E");
 
     const [totalSCVotums, setTotalSCVotums] = useState([]);
     const [ballotInfo, setBallotInfo] = useState([]);
     const [localBallots, setLocalBallots] = useState([]);
 
-
     useEffect(() => {
         console.log("W3Context::UseEffect on Address " + address);
-        readBallotsFromChain();
-        convertBallotData();
+        readBallotsFromChain(); convertBallotData();
         console.log("\tCollected Blochchain information " + address);
     }, [address]);
 
@@ -57,9 +55,13 @@ const W3ContextProvider = (props) => {
                 provider
             );
 
-            var ballots = await contract.getAllBallots();
-            setTotalSCVotums(ballots);
-            console.log("\tReceived Ballots: " + totalSCVotums);
+            try{
+                var ballots = await contract.getAllBallots();
+                setTotalSCVotums(ballots);
+                console.log("\tReceived Ballots: " + totalSCVotums);
+            }catch(err){
+                console.log(err);
+            }
         }
     }
 
@@ -74,31 +76,35 @@ const W3ContextProvider = (props) => {
                 ballotOpen.abi,
                 provider
             );
-            var _creator = ""+ await contract.creator();
-            var _title = ""+ await contract.title();
-            var _metainfo = ""+ await contract.metainfo();
-            var _startTime = ""+ await contract.startTime();
-            var _endTime = ""+ await contract.endTime();
-            var _totalVotes = ""+ await contract.totalVotes();
-            var _proVotes = ""+ await contract.proVotes();
-            
-            var _startDate = ""+ new Date(_startTime * 1000).toLocaleString();
-            var _endDate = ""+ new Date(_endTime * 1000).toLocaleString();
-
-            console.log('\tReceived Ballot Data' + '\n' + 
-            '\t\t _creator: ' + _creator + " (" + typeof _creator + ")\n" +        
-            '\t\t _title: ' + _title + " (" + typeof _title + ")\n" +
-            '\t\t _metainfo: ' + _metainfo + " (" + typeof _metainfo + ")\n" +
-            '\t\t _startTime: ' + _startTime + " (" + typeof _startTime + ")\n" +
-            '\t\t _endTime: ' + _endTime + " (" + typeof _endTime + ")\n" +
-            '\t\t _totalVotes: ' + _totalVotes + " (" + typeof _totalVotes + ")\n" +
-            '\t\t _proVotes: ' + _proVotes + " (" + typeof _proVotes + ")\n" +
-            '\t\t _startDate: ' + _startDate + " (" + typeof _startDate + ")\n" +
-            '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n"        
-            );
-            
-            setBallotInfo({id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
-            console.log("\tConversion::BallotInfo: " + ballotInfo);
+            try{
+                var _creator = ""+ await contract.creator();
+                var _title = ""+ await contract.title();
+                var _metainfo = ""+ await contract.metainfo();
+                var _startTime = ""+ await contract.startTime();
+                var _endTime = ""+ await contract.endTime();
+                var _totalVotes = ""+ await contract.totalVotes();
+                var _proVotes = ""+ await contract.proVotes();
+                
+                var _startDate = ""+ new Date(_startTime * 1000).toLocaleString();
+                var _endDate = ""+ new Date(_endTime * 1000).toLocaleString();
+    
+                console.log('\tReceived Ballot Data' + '\n' + 
+                '\t\t _creator: ' + _creator + " (" + typeof _creator + ")\n" +        
+                '\t\t _title: ' + _title + " (" + typeof _title + ")\n" +
+                '\t\t _metainfo: ' + _metainfo + " (" + typeof _metainfo + ")\n" +
+                '\t\t _startTime: ' + _startTime + " (" + typeof _startTime + ")\n" +
+                '\t\t _endTime: ' + _endTime + " (" + typeof _endTime + ")\n" +
+                '\t\t _totalVotes: ' + _totalVotes + " (" + typeof _totalVotes + ")\n" +
+                '\t\t _proVotes: ' + _proVotes + " (" + typeof _proVotes + ")\n" +
+                '\t\t _startDate: ' + _startDate + " (" + typeof _startDate + ")\n" +
+                '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n"        
+                );
+                
+                setBallotInfo({id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
+                console.log("\tConversion::BallotInfo: " + ballotInfo);
+            }catch(err){
+                console.log(err);
+            }
         }
     }
 
@@ -113,7 +119,12 @@ const W3ContextProvider = (props) => {
                 signer
             );
 
-            const contract = await scFactory.deploy(archive, title, metainfo, BigNumber.from(votingDays));
+            try{
+                const contract = await scFactory.deploy(archive, title, metainfo, BigNumber.from(votingDays));
+            }catch(err){
+                console.log(err);
+            }
+
             console.log("\tDeployed to Address: " + contract.address);
         }
     }
@@ -130,9 +141,16 @@ const W3ContextProvider = (props) => {
                 ballotOpen.abi,
                 signer
             );
-            const contractInteration = await contract.vote(BigNumber.from(2));
-            console.log("\tSubmitted Vote 'YES' on #"+id);
-            updateLocalBallotVote(id, 2);
+            
+            try{
+                const contractInteration = await contract.vote(BigNumber.from(2));
+                console.log("\tSubmitted Vote 'YES' on #"+id);
+                updateLocalBallotVote(id, 2);
+            }catch(err){
+                console.log(err);
+
+            }
+
         }
 
     }
@@ -148,13 +166,18 @@ const W3ContextProvider = (props) => {
                 ballotOpen.abi,
                 signer
             );
-            const contractInteration = await contract.vote(BigNumber.from(1));
-            console.log("\tSubmitted Vote 'NO' on #"+id);
-            updateLocalBallotVote(id, 1);
+
+            try{
+                const contractInteration = await contract.vote(BigNumber.from(1));
+                console.log("\tSubmitted Vote 'NO' on #"+id);
+                updateLocalBallotVote(id, 1);
+            }catch(err){
+                console.log(err);
+            }
         }
     }
 
-    // Doesn't quite work
+    // TODO -- Test, seems a little erratic at times
     const updateLocalBallotVote = (id, choice) => {
         console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
 

@@ -26,16 +26,22 @@ const Navbar = () => {
         </Link>
       </div>
       <div className='navbar-end'>
-        <div className='navbar-item'>
-          <p className='control'>
-            <a href={`https://rinkeby.etherscan.io/address/${address}`} target="_blank" className='button is-white'>{address}</a> 
-          </p>
-        </div>
-        <div className='navbar-item'>
-          <p className='control'>
-            <a className='button is-white' onClick={connect}>Connect Wallet</a>
-          </p>
-        </div>
+        {
+          address !== '' ? (
+            <div className='navbar-item'>
+              <p className='control'>
+                <a href={`https://rinkeby.etherscan.io/address/${address}`} target="_blank" className='button is-white'>{address}</a>
+              </p>
+            </div>
+          ) : (
+            <div className='navbar-item'>
+              <p className='control'>
+                <a className='button is-white' onClick={connect}>Connect Wallet</a>
+              </p>
+            </div>
+          )
+
+        }
       </div>
     </nav>
   )
