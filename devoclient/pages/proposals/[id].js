@@ -3,11 +3,11 @@ import { useRouter } from 'next/router';
 import { W3Context } from '../../context/W3Context';
 
 const Proposal = () => {
-    const { ballotData } = useContext(W3Context);
+    const { localBallots, voteYes, voteNo } = useContext(W3Context);
     const router = useRouter();
 
     return (
-        ballotData.map(poll => {
+        localBallots.map(poll => {
             if (poll.id == router.query.id) {
                 console.log("Rendering Ballot" + poll.id + " - " + poll.title);
                 return (
@@ -28,10 +28,10 @@ const Proposal = () => {
                             </div>
                             <div className="field is-grouped">
                                 <p className="control">
-                                    <button className="button is-large is-success">Vote Yes</button>
+                                    <button onClick={() => voteYes(poll.id)} className="button is-large is-success">Vote Yes</button>
                                 </p>
                                 <p className="control">
-                                    <button className="button is-large is-danger">Vote No</button>
+                                    <button onClick={() => voteNo(poll.id)} className="button is-large is-danger">Vote No</button>
                                 </p>
                             </div>
                         </div>

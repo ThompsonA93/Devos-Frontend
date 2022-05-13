@@ -1,5 +1,4 @@
 import React, { useContext, useState } from 'react';
-import { PollContext } from '../context/PollContext';
 import { W3Context } from '../context/W3Context';
 
 const NewPollForm = () => {

@@ -9,8 +9,10 @@ const PollDetails = ({ poll }) => {
             <dt>{poll.title}, by {poll.creator}</dt>
             <dd>{poll.metainfo}</dd>
             <dd>Voting available until [{poll.endDate}]</dd>
+            <dd>{poll.totalVotes} have voted, {poll.proVotes} voted in favor.</dd>
             <Link href={{pathname: `/proposals/[id]`, query: {id: poll.id}}}>            
-            <dd><button className='button is-link is-small is-inverted'>Vote Now!</button></dd>
+            <dd>
+                <button className='button is-link is-small is-inverted'>Vote Now!</button></dd>
             </Link>
         </div>
 

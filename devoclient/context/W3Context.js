@@ -21,22 +21,26 @@ const W3ContextProvider = (props) => {
         
     }, [address]);
 
-
     useEffect(() => {
         console.log("UseEffect::Conversion");
         setLocalBallots([...localBallots, ballotInfo]);
         console.log("UseEffect::Update " + localBallots);
     }, [ballotInfo])
 
-    /*
-    useEffect(() => {
-        setLocalBallots(...localBallots, singleBallotData);
-        console.log("Updated Local Ballot List: " + localBallots);
-    }, [singleBallotData]);
-    */
-    /**************************************/
-    /* Local Blockchain-Related           */
-    /**************************************/
+
+    // TODO :: Refactor to local storage ?
+    const connect = async () => {
+        if (window.ethereum) {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            const address = ethers.utils.getAddress(accounts[0]);
+            console.log("User detected: " + address);
+            setAddress(address);
+        }
+        console.log("\tChange in Address: " + address);
+    }
+
     const readBallotsFromChain = async () => {
         console.log("W3ContextProvider::readBallotsFromChain, Archive at: " + archive);
         if (window.ethereum) {
@@ -52,7 +56,6 @@ const W3ContextProvider = (props) => {
             console.log("\tReceived Ballots: " + totalSCVotums);
         }
     }
-
 
     const convertBallotData = async () => {
         console.log("\tNumber of Polls: " + totalSCVotums.length);
@@ -89,58 +92,9 @@ const W3ContextProvider = (props) => {
             
             setBallotInfo({id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
             console.log("\tConversion::BallotInfo: " + ballotInfo);
-            
-
-
-            //setBallotInfo([{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
-            //setBallotInfo([{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
-            //console.log("\tBallot #" + i + " info - " + ballotArchive.ballotInfo);
-            
-            /*
-            setBallotData(...singleBallotData, 
-                JSON.stringify({id: new Number(i), 
-                    title: new String(_title), 
-                    creator: new String(_creator), 
-                    metainfo: new String(_metainfo), 
-                    startDate: new Date(_startDate), 
-                    endDate: new Date(_endDate), 
-                    totalVotes: new Number(_totalVotes), 
-                    proVotes: new Number(_proVotes) })
-                );
-            */
-            //setSingleBallotData(...singleBallotData, [{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
-            //console.log("Allocated Ballot data: " + singleBallotData.length + " : " + singleBallotData);
-            
-            //console.log("\tLocally allocated Ballot data: IT:" + singleBallotData[i] + "\n\tCreator: " + singleBallotData[i] + "\n\tTitle:" + singleBallotData.title + "\n\tMetainfo:" + singleBallotData.metainfo + "\n\tTime:" + singleBallotData.startDate + " -- " + singleBallotData.endDate + "\n\tVotes: " + singleBallotData.totalVotes + "/" + singleBallotData.proVotes);
-            //setBallotData([{id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes }]);
-            //localStorage.setItem('ballot', JSON.stringify(i, _creator, _title, _metainfo, _startDate, _endDate, _totalVotes, _proVotes));
         }
-
     }
 
-
-
-
-
-
-
-
-
-
-
-
-    // TODO :: Refactor to local storage
-    const connect = async () => {
-        if (window.ethereum) {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-            const address = ethers.utils.getAddress(accounts[0]);
-            console.log("User detected: " + address);
-            setAddress(address);
-        }
-        console.log("\tChange in Address: " + address);
-    }
 
     const deployBallotToChain = async (title, metainfo, votingDays) => {
         if (window.ethereum) {
@@ -158,34 +112,59 @@ const W3ContextProvider = (props) => {
     }
 
 
+    const voteYes = async(id) => {
+        console.log("Calling Yes on Ballot #" + id);
 
+        if(window.ethereum){
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = await new ethers.Contract(
+                totalSCVotums[id],
+                ballotOpen.abi,
+                signer
+            );
+            const contractInteration = await contract.vote(BigNumber.from(2));
+            console.log("\tSubmitted Vote 'YES' on #"+id);
+            updateLocalBallotVote(id, 2);
+        }
 
+    }
+    
+    const voteNo = async(id) => {
+        console.log("Calling No on Ballot #" + id);
 
+        if(window.ethereum){
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = await new ethers.Contract(
+                totalSCVotums[id],
+                ballotOpen.abi,
+                signer
+            );
+            const contractInteration = await contract.vote(BigNumber.from(1));
+            console.log("\tSubmitted Vote 'NO' on #"+id);
+            updateLocalBallotVote(id, 1);
+        }
+    }
 
+    // Doesn't quite work
+    const updateLocalBallotVote = (id, choice) => {
+        console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        var tVotes = parseInt(localBallots[id].totalVotes);
+        tVotes += 1;
+        localBallots[id].totalVotes = tVotes.toString();
+        if(choice === 2){
+            var pVotes = parseInt(localBallots[id].proVotes);
+            pVotes += 1;
+            localBallots[id].proVotes = pVotes.toString();
+        }
+        console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
+    }
 
 
     return (
-        <W3Context.Provider value={{ address, archive, localBallots, connect, setArchive, totalSCVotums, deployBallotToChain }}>
+        <W3Context.Provider value={{ address, archive, localBallots, connect, setArchive, deployBallotToChain, voteYes, voteNo }}>
             {props.children}
         </W3Context.Provider>
     )
