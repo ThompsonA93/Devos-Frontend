@@ -8,7 +8,7 @@ const PollUser = () => {
     return (
         <dl className='m-4'>
             {localBallots.map(poll => {
-                console.log("\tCheck to render user ballot: \n\t" + poll.id + " || "+ poll.creator +  ":" + address);
+                //console.log("\t\tCheck to render user ballot: \n\t" + poll.id + " || "+ poll.creator +  ":" + address);
                 return poll.creator === address ? (
                     <PollDetails poll={poll} key={poll.id} />
                 ) : (

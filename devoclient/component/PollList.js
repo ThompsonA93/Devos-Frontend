@@ -8,7 +8,7 @@ const PollList = () => {
     return (
         <dl className='m-4'>
             {localBallots.map(poll => {
-                console.log("\tRendering Ballot: " + poll.id + " | " + poll.title);
+                //console.log("\t\tRendering Ballot: " + poll.id + " | " + poll.title);
                 return poll.id >= 0 ? (
                     <PollDetails poll={poll} key={poll.id} />
                 ) : (
