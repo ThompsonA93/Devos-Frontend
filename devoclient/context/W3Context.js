@@ -14,15 +14,13 @@ const W3ContextProvider = (props) => {
     const [localBallots, setLocalBallots] = useState([]);
 
     useEffect(() => {
-        console.log("W3Context::UseEffect on Address " + address);
-
         readBallotsFromChain();
-
         for (var i = 0; i < totalSCVotums.length; i++) {
             convertBallotData(i);
         }
-
-        console.log("\tCollected Blockchain information " + address);
+        console.log("W3Context::UseEffect on Address " + address + "\n" +
+            "\tCollected Blockchain information on " + totalSCVotums + "\n"
+        );
     }, [address]);
 
     useEffect(() => {
@@ -33,11 +31,12 @@ const W3ContextProvider = (props) => {
         } else {  // Allocate if ID valid & not existing
             setLocalBallots([...localBallots, ballotInfo]);
         }
+        
         console.log("W3Context::UseEffect on ballotInfo " + ballotInfo + "\n" + 
             "\tUpdating local Ballots " + localBallots + "\n"
         );
     }, [ballotInfo])
-
+    
 
     // TODO :: Refactor to local storage ?
     const connect = async () => {
@@ -80,9 +79,9 @@ const W3ContextProvider = (props) => {
         const t0 = performance.now();
 
         console.log("\tWorking on: #" + i + " - " + totalSCVotums[i]);
-        if(localBallots[i]){
+        if (localBallots[i]) {
             console.log("Local Ballot #" + i + " exists.\n")
-        }else{
+        } else {
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = await new ethers.Contract(
@@ -97,12 +96,12 @@ const W3ContextProvider = (props) => {
                 var _endTime = "" + await contract.endTime();
                 var _totalVotes = "" + await contract.totalVotes();
                 var _proVotes = "" + await contract.proVotes();
-    
+
                 var _startDate = "" + new Date(_startTime * 1000).toLocaleString();
                 var _endDate = "" + new Date(_endTime * 1000).toLocaleString();
-    
+
                 const t1 = performance.now();
-    
+
                 console.log('\tReceived Ballot Data' + '\n' +
                     '\t\t _creator: ' + _creator + " (" + typeof _creator + ")\n" +
                     '\t\t _title: ' + _title + " (" + typeof _title + ")\n" +
@@ -113,11 +112,35 @@ const W3ContextProvider = (props) => {
                     '\t\t _proVotes: ' + _proVotes + " (" + typeof _proVotes + ")\n" +
                     '\t\t _startDate: ' + _startDate + " (" + typeof _startDate + ")\n" +
                     '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n" +
-                    '\t\t ReadTime: ' + (t1 - t0) + " ms\n" 
+                    '\t\t ReadTime: ' + (t1 - t0) + " ms\n"
                 );
 
                 // Fixme :: Dirty timeout versus Race Condition
-                await new Promise(r=> setTimeout(r, i*233))
+                await new Promise(r => setTimeout(r, i * 233))
+
+                // FIXME :: Experimental local storage ops
+                // WRITE
+                const importedContractData = {
+                    id: i, 
+                    title: _title, 
+                    creator: _creator, 
+                    metainfo: _metainfo, 
+                    startDate: _startDate, 
+                    endDate: _endDate, 
+                    totalVotes: _totalVotes, 
+                    proVotes: _proVotes
+                }
+                //sessionStorage.setItem("DevosBallotInformation", sessionStorage.getItem("DevosBallotInformation") + JSON.stringify(importedContractData))
+                sessionStorage.setItem("DevosBallotInformation_"+i, JSON.stringify(importedContractData));
+                // READ 
+                let sessionStorageContractData = sessionStorage.getItem("DevosBallotInformation_"+i);
+                console.log(JSON.parse(sessionStorageContractData));
+                /*
+                for (var contractDataObject in sessionStorageContractData){
+                    var contractData = JSON.parse(contractDataObject);
+                    console.log("############# " + contractData.id)
+                }
+                */
 
                 setBallotInfo({ id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
                 console.log("\tConversion::BallotInfo: " + ballotInfo);
@@ -125,10 +148,8 @@ const W3ContextProvider = (props) => {
                 console.log(err);
             }
         }
-
         //}
     }
-
 
     const deployBallotToChain = async (title, metainfo, votingDays) => {
 
