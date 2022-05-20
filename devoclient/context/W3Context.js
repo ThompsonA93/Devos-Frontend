@@ -115,7 +115,7 @@ const W3ContextProvider = (props) => {
                     '\t\t ReadTime: ' + (t1 - t0) + " ms\n"
                 );
 
-                // Fixme :: Dirty timeout versus Race Condition
+                // FIXME :: Dirty timeout versus Race Condition
                 await new Promise(r => setTimeout(r, i * 233))
 
                 // FIXME :: Experimental local storage ops
@@ -141,6 +141,14 @@ const W3ContextProvider = (props) => {
                     console.log("############# " + contractData.id)
                 }
                 */
+
+                // Tests ~~ 1.000.000
+                    // Check three different criterias for testing scopes
+                    // Different Scenarios (Scalability, Performance, Efficiency, Cost)
+                    // Performance vs Trust 
+                        // Formularize Trust ~?
+                    // Usecases: At University, Hospital, Gov.
+                // Reading all contracts 
 
                 setBallotInfo({ id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
                 console.log("\tConversion::BallotInfo: " + ballotInfo);
