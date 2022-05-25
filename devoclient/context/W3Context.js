@@ -84,7 +84,7 @@ const W3ContextProvider = (props) => {
         } else {
             try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const contract = await new ethers.Contract(
+                const contract = new ethers.Contract(
                     totalSCVotums[i],
                     ballotOpen.abi,
                     provider
@@ -114,12 +114,11 @@ const W3ContextProvider = (props) => {
                     '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n" +
                     '\t\t ReadTime: ' + (t1 - t0) + " ms\n"
                 );
-
-                // FIXME :: Dirty timeout versus Race Condition
-                await new Promise(r => setTimeout(r, i * 233))
-
-                // FIXME :: Experimental local storage ops
-                // WRITE
+                // FIXME :: Testing area. Check on use for LocalStorage vs StateStorage vs IdxDB
+                // Check three different criterias for testing scopes
+                // Different Scenarios (Scalability, Performance, Efficiency, Cost)
+                // Usecases: At University, Hospital, Gov...
+                // Performance vs Trust 
                 const importedContractData = {
                     id: i, 
                     title: _title, 
@@ -130,28 +129,31 @@ const W3ContextProvider = (props) => {
                     totalVotes: _totalVotes, 
                     proVotes: _proVotes
                 }
-                //sessionStorage.setItem("DevosBallotInformation", sessionStorage.getItem("DevosBallotInformation") + JSON.stringify(importedContractData))
+
+                /***************************/
+                /***** Session Storage *****/
+                /***************************/
                 sessionStorage.setItem("DevosBallotInformation_"+i, JSON.stringify(importedContractData));
-                // READ 
                 let sessionStorageContractData = sessionStorage.getItem("DevosBallotInformation_"+i);
                 console.log(JSON.parse(sessionStorageContractData));
-                /*
-                for (var contractDataObject in sessionStorageContractData){
-                    var contractData = JSON.parse(contractDataObject);
-                    console.log("############# " + contractData.id)
-                }
-                */
 
-                // Tests ~~ 1.000.000
-                    // Check three different criterias for testing scopes
-                    // Different Scenarios (Scalability, Performance, Efficiency, Cost)
-                    // Performance vs Trust 
-                        // Formularize Trust ~?
-                    // Usecases: At University, Hospital, Gov.
-                // Reading all contracts 
+                /***************************/
+                /***** IndexDB Storage *****/
+                /***************************/
+                // FIXME: DB Creation not needed for every worker thread
+                
 
+
+                
+
+                /***************************/
+                /****** State Storage ******/
+                /***************************/
+                // FIXME :: Dirty timeout versus Race Condition
+                await new Promise(r => setTimeout(r, i * 233))
                 setBallotInfo({ id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
                 console.log("\tConversion::BallotInfo: " + ballotInfo);
+
             } catch (err) {
                 console.log(err);
             }
