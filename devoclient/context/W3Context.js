@@ -3,49 +3,52 @@ import { ethers, BigNumber, ContractFactory } from 'ethers';
 import ballotOpen from '../artifacts/contracts/BallotOpen.sol/BallotOpen.json';
 import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchive.json';
 
+import IDBHandler from '../scripts/IDBHandler';
+
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
     const [address, setAddress] = useState('');
     const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E");
 
-    const [totalSCVotums, setTotalSCVotums] = useState([]);
-    const [ballotInfo, setBallotInfo] = useState([]);
-    const [localBallots, setLocalBallots] = useState([]);
+    const [loadTotalBallotsDB, setLoadTotalBallotsDB] = useState(false);
+    const [loadSingleBallots, setLoadSingleBallots] = useState(0);
 
+    // On Login
     useEffect(() => {
-        readBallotsFromChain();
-        for (var i = 0; i < totalSCVotums.length; i++) {
-            convertBallotData(i);
+        if (address !== '') {
+            setLoadTotalBallotsDB(true);
+            console.log("\tW3Context::UseEffect on Address [" + address + "]\n");
         }
-        console.log("W3Context::UseEffect on Address " + address + "\n" +
-            "\tCollected Blockchain information on " + totalSCVotums + "\n"
-        );
     }, [address]);
 
+    // Update IDB-DB TotalBallots
     useEffect(() => {
-        if (ballotInfo.id === undefined) {    // Disregard misallocated objects; Not sure where those come from
-            console.log("\tBallotInfo is Undefined!");
-        } else if (localBallots[ballotInfo.id]) { // Check if Id already exists ; FIXME: Handled correctly?
-            console.log("\tBallot " + ballotInfo.id + " already allocated.");
-        } else {  // Allocate if ID valid & not existing
-            setLocalBallots([...localBallots, ballotInfo]);
+        if (loadTotalBallotsDB) {
+            console.log("\tW3Context::UseEffect on loadTotalBallotsDB [" + loadTotalBallotsDB + "]\n");
+            readBallotsFromChain();
+            setLoadTotalBallotsDB(false);
         }
-        
-        console.log("W3Context::UseEffect on ballotInfo " + ballotInfo + "\n" + 
-            "\tUpdating local Ballots " + localBallots + "\n"
-        );
-    }, [ballotInfo])
-    
+    }, [loadTotalBallotsDB]);
 
-    // TODO :: Refactor to local storage ?
+    // Update IDB-DB SingleBallots
+    useEffect(() => {
+        if (loadSingleBallots) {
+            console.log("\tW3Context::UseEffect on setLoadSingleBallots.\n");
+            for (var i = 0; i < loadSingleBallots; i++) {
+                convertBallotData(i);
+            }
+
+        }
+    }, [loadSingleBallots]);
+
     const connect = async () => {
         if (window.ethereum) {
             const accounts = await window.ethereum.request({
                 method: "eth_requestAccounts",
             });
             const address = ethers.utils.getAddress(accounts[0]);
-            console.log("User detected: " + address);
+            console.log("\tUser detected: " + address);
             setAddress(address);
         }
         console.log("\tChange in Address: " + address);
@@ -54,111 +57,129 @@ const W3ContextProvider = (props) => {
     const readBallotsFromChain = async () => {
         console.log("W3ContextProvider::readBallotsFromChain, Archive at: " + archive);
         if (window.ethereum) {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const contract = await new ethers.Contract(
-                archive,
-                ballotArchive.abi,
-                provider
-            );
-
             try {
-                var ballots = await contract.getAllBallots();
-                setTotalSCVotums(ballots);
-                console.log("\tReceived Ballots: " + totalSCVotums);
-            } catch (err) {
-                console.log(err);
-            }
-        }
-
-
-    }
-
-    const convertBallotData = async (i) => {
-        console.log("\tNumber of Polls: " + totalSCVotums.length);
-        //for (var i = 0; i < totalSCVotums.length; i++) {
-        const t0 = performance.now();
-
-        console.log("\tWorking on: #" + i + " - " + totalSCVotums[i]);
-        if (localBallots[i]) {
-            console.log("Local Ballot #" + i + " exists.\n")
-        } else {
-            try {
+                const loadContractStart = performance.now();
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(
-                    totalSCVotums[i],
-                    ballotOpen.abi,
+                    archive,
+                    ballotArchive.abi,
                     provider
                 );
-                var _creator = "" + await contract.creator();
-                var _title = "" + await contract.title();
-                var _metainfo = "" + await contract.metainfo();
-                var _startTime = "" + await contract.startTime();
-                var _endTime = "" + await contract.endTime();
-                var _totalVotes = "" + await contract.totalVotes();
-                var _proVotes = "" + await contract.proVotes();
+                var ballots = await contract.getAllBallots();
+                const loadContractDuration = performance.now() - loadContractStart;
+                console.log("\tReceived Ballots: " + ballots + "\n\tLoading Time: " + loadContractDuration + "ms\n");
 
-                var _startDate = "" + new Date(_startTime * 1000).toLocaleString();
-                var _endDate = "" + new Date(_endTime * 1000).toLocaleString();
-
-                const t1 = performance.now();
-
-                console.log('\tReceived Ballot Data' + '\n' +
-                    '\t\t _creator: ' + _creator + " (" + typeof _creator + ")\n" +
-                    '\t\t _title: ' + _title + " (" + typeof _title + ")\n" +
-                    '\t\t _metainfo: ' + _metainfo + " (" + typeof _metainfo + ")\n" +
-                    '\t\t _startTime: ' + _startTime + " (" + typeof _startTime + ")\n" +
-                    '\t\t _endTime: ' + _endTime + " (" + typeof _endTime + ")\n" +
-                    '\t\t _totalVotes: ' + _totalVotes + " (" + typeof _totalVotes + ")\n" +
-                    '\t\t _proVotes: ' + _proVotes + " (" + typeof _proVotes + ")\n" +
-                    '\t\t _startDate: ' + _startDate + " (" + typeof _startDate + ")\n" +
-                    '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n" +
-                    '\t\t ReadTime: ' + (t1 - t0) + " ms\n"
-                );
-                // FIXME :: Testing area. Check on use for LocalStorage vs StateStorage vs IdxDB
-                // Check three different criterias for testing scopes
-                // Different Scenarios (Scalability, Performance, Efficiency, Cost)
-                // Usecases: At University, Hospital, Gov...
-                // Performance vs Trust 
-                const importedContractData = {
-                    id: i, 
-                    title: _title, 
-                    creator: _creator, 
-                    metainfo: _metainfo, 
-                    startDate: _startDate, 
-                    endDate: _endDate, 
-                    totalVotes: _totalVotes, 
-                    proVotes: _proVotes
-                }
-
-                /***************************/
-                /***** Session Storage *****/
-                /***************************/
-                sessionStorage.setItem("DevosBallotInformation_"+i, JSON.stringify(importedContractData));
-                let sessionStorageContractData = sessionStorage.getItem("DevosBallotInformation_"+i);
-                console.log(JSON.parse(sessionStorageContractData));
-
-                /***************************/
-                /***** IndexDB Storage *****/
-                /***************************/
-                // FIXME: DB Creation not needed for every worker thread
+                // Load Address-Votums to IDB
+                const loadIDBStart = performance.now();
+                
                 
 
 
+                // const request = indexedDB.open("DevosDB", 1);
+                // request.onerror = function (event) {
+                //     console.log("IDB-Loading error: " + event);
+                // }
+                // request.onupgradeneeded = function () {
+                //     const db = request.result;
+                //     const store = db.createObjectStore("ballots", { keyPath: "id" });
+                //     store.createIndex("address", ["address"], {unique: true});
+                // }
+                // request.onsuccess = function () {
+                //     const db = request.result;
+                //     const transaction = db.transaction("ballots", "readwrite");
+                //     const store = transaction.objectStore("ballots");
+
+                //     for (var i = 0; i < ballots.length; i++) {
+                //         var address = ballots[i];
+                //         store.put({ id: i, address: address });
+                //         console.log("\tStored " + address + " on local IDB.\n");
+                //     }
+                // }
+                // const loadIDBDuration = performance.now() - loadIDBStart;
+                // console.log("Wrote contract information to IDB.\n\tLoading Time: " + loadIDBDuration + "ms\n");
                 
-
-                /***************************/
-                /****** State Storage ******/
-                /***************************/
-                // FIXME :: Dirty timeout versus Race Condition
-                await new Promise(r => setTimeout(r, i * 233))
-                setBallotInfo({ id: i, title: _title, creator: _creator, metainfo: _metainfo, startDate: _startDate, endDate: _endDate, totalVotes: _totalVotes, proVotes: _proVotes });
-                console.log("\tConversion::BallotInfo: " + ballotInfo);
-
+                
+                setLoadSingleBallots(ballots.length);
+            
             } catch (err) {
                 console.log(err);
             }
+
         }
-        //}
+    }
+
+    const convertBallotData = async (id) => {
+        console.log("\tWorking on contract #" + id + "\n");
+        try {
+            const request = indexedDB.open("DevosDB", 1);
+            var contractAddress;
+            request.onerror = function (event) {
+                console.log("IDB-Loading error: " + event);
+            }
+            request.onupgradeneeded = function () {
+                const db = request.result;
+            }
+            request.onsuccess = function (id) {
+                const db = request.result;
+                const transaction = db.transaction("ballots", "readwrite");
+                const store = transaction.objectStore("ballots");
+                const query = store.get(1);
+                contractAddress = query.result;
+                
+            }
+            console.log("Fetched Address: " + contractAddress);
+
+            // const provider = new ethers.providers.Web3Provider(window.ethereum);
+            // const contract = new ethers.Contract(
+            //     contractaddress,
+            //     ballotOpen.abi,
+            //     provider
+            // );
+            // var _creator = "" + await contract.creator();
+            // var _title = "" + await contract.title();
+            // var _metainfo = "" + await contract.metainfo();
+            // var _startTime = "" + await contract.startTime();
+            // var _endTime = "" + await contract.endTime();
+            // var _totalVotes = "" + await contract.totalVotes();
+            // var _proVotes = "" + await contract.proVotes();
+
+            // var _startDate = "" + new Date(_startTime * 1000).toLocaleString();
+            // var _endDate = "" + new Date(_endTime * 1000).toLocaleString();
+
+            // console.log('\tReceived Ballot Data' + '\n' +
+            //     '\t\t _creator: ' + _creator + " (" + typeof _creator + ")\n" +
+            //     '\t\t _title: ' + _title + " (" + typeof _title + ")\n" +
+            //     '\t\t _metainfo: ' + _metainfo + " (" + typeof _metainfo + ")\n" +
+            //     '\t\t _startTime: ' + _startTime + " (" + typeof _startTime + ")\n" +
+            //     '\t\t _endTime: ' + _endTime + " (" + typeof _endTime + ")\n" +
+            //     '\t\t _totalVotes: ' + _totalVotes + " (" + typeof _totalVotes + ")\n" +
+            //     '\t\t _proVotes: ' + _proVotes + " (" + typeof _proVotes + ")\n" +
+            //     '\t\t _startDate: ' + _startDate + " (" + typeof _startDate + ")\n" +
+            //     '\t\t _endDate: ' + _endDate + " (" + typeof _endDate + ")\n" +
+            //     '\t\t ReadTime: ' + (t1 - t0) + " ms\n"
+            // );
+
+            // const importedContractData = {
+            //     id: i,
+            //     title: _title,
+            //     creator: _creator,
+            //     metainfo: _metainfo,
+            //     startDate: _startDate,
+            //     endDate: _endDate,
+            //     totalVotes: _totalVotes,
+            //     proVotes: _proVotes
+            // }
+            // console.log("As Object: " + importedContractData);
+
+            /***************************/
+            /***** IndexDB Storage *****/
+            /***************************/
+            // FIXME: DB Creation not needed for every worker thread
+
+
+        } catch (err) {
+            console.log(err);
+        }
     }
 
     const deployBallotToChain = async (title, metainfo, votingDays) => {
@@ -183,7 +204,7 @@ const W3ContextProvider = (props) => {
 
 
     const voteYes = async (id) => {
-        console.log("Calling Yes on Ballot #" + id);
+        console.log("\tCalling Yes on Ballot #" + id);
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -207,7 +228,7 @@ const W3ContextProvider = (props) => {
     }
 
     const voteNo = async (id) => {
-        console.log("Calling No on Ballot #" + id);
+        console.log("\tCalling No on Ballot #" + id);
 
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -245,7 +266,7 @@ const W3ContextProvider = (props) => {
 
 
     return (
-        <W3Context.Provider value={{ address, archive, localBallots, connect, setArchive, deployBallotToChain, voteYes, voteNo }}>
+        <W3Context.Provider value={{ address, archive, connect, setArchive, deployBallotToChain, voteYes, voteNo }}>
             {props.children}
         </W3Context.Provider>
     )
