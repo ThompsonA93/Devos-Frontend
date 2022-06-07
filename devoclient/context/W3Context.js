@@ -72,33 +72,6 @@ const W3ContextProvider = (props) => {
                 // Load Address-Votums to IDB
                 const loadIDBStart = performance.now();
                 
-                
-
-
-                // const request = indexedDB.open("DevosDB", 1);
-                // request.onerror = function (event) {
-                //     console.log("IDB-Loading error: " + event);
-                // }
-                // request.onupgradeneeded = function () {
-                //     const db = request.result;
-                //     const store = db.createObjectStore("ballots", { keyPath: "id" });
-                //     store.createIndex("address", ["address"], {unique: true});
-                // }
-                // request.onsuccess = function () {
-                //     const db = request.result;
-                //     const transaction = db.transaction("ballots", "readwrite");
-                //     const store = transaction.objectStore("ballots");
-
-                //     for (var i = 0; i < ballots.length; i++) {
-                //         var address = ballots[i];
-                //         store.put({ id: i, address: address });
-                //         console.log("\tStored " + address + " on local IDB.\n");
-                //     }
-                // }
-                // const loadIDBDuration = performance.now() - loadIDBStart;
-                // console.log("Wrote contract information to IDB.\n\tLoading Time: " + loadIDBDuration + "ms\n");
-                
-                
                 setLoadSingleBallots(ballots.length);
             
             } catch (err) {
