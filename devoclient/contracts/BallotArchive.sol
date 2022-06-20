@@ -4,7 +4,7 @@ pragma solidity ^0.8;
 /**
  * @title BallotArchive
  * @author ThompsonA93
- * @notice Stores ballots and their creators in form of mappings
+ * @notice Version 3; Stores ballots and their creators in form of mappings
  * @dev Storing data by external smart contract calls.
  */
 contract BallotArchive{

@@ -15,18 +15,19 @@ interface IBallotArchive {
  * @dev Dependant on primary smart contract "BallotArchive", @see constructor()
  */
 contract BallotOpen{
-    address public archiveAddress;
+    struct Ballot{
+        address archiveAddress;
+        address creator;
+        address ballotAddress;
+        string title;
+        string metainfo;
+        uint startTime;
+        uint endTime;
+        uint totalVotes;
+        uint proVotes;
+    }
+    Ballot ballot;
 
-    address public creator;
-    address public ballotAddress;
-
-    string public title;
-    string public metainfo;
-    uint public startTime;
-    uint public endTime;
-    
-    uint public totalVotes = 0;
-    uint public proVotes = 0;
 
     /**
      * @dev map voters to given votes.
@@ -45,17 +46,19 @@ contract BallotOpen{
      * TODO:: Check if saving archiveAddress is necessary
      */
     constructor(address _archiveAddress, string memory _title, string memory _metainfo, uint _votingDays){
-        archiveAddress = _archiveAddress;
+        ballot = Ballot(
+            _archiveAddress,
+            msg.sender,
+            address(this),
+            _title,
+            _metainfo,
+            block.timestamp,
+            block.timestamp + (_votingDays * 1 days),
+            0,
+            0
+        );
 
-        creator = msg.sender;
-        ballotAddress = address(this);
-
-        title = _title;
-        metainfo = _metainfo;
-        startTime = block.timestamp;
-        endTime = startTime + (_votingDays * 1 days);
-
-        IBallotArchive(archiveAddress).createNewBallot(creator, ballotAddress);
+        IBallotArchive(ballot.archiveAddress).createNewBallot(ballot.creator, ballot.ballotAddress);
     }
 
     /**
@@ -70,7 +73,7 @@ contract BallotOpen{
      * @dev modifier requiring that following code is only executed within given time limit
      */
     modifier validVotingTime(){
-        require(block.timestamp < endTime);
+        require(block.timestamp < ballot.endTime);
         _;
     }
 
@@ -80,9 +83,25 @@ contract BallotOpen{
      */
     function vote(uint8 _choice) public validVotingTime() hasNotVoted(msg.sender){        
         votes[msg.sender] = _choice;
-        if(_choice == 2){ proVotes += 1; }
-        totalVotes += 1;
+        if(_choice == 2){ ballot.proVotes += 1; }
+        ballot.totalVotes += 1;
     }
 
-
+    /**
+     * @return Every field of the Struct as object value
+     * @dev To replace oneday to return struct
+     */
+    function getFullBallotInformation() public view returns(address, address, address, string memory,  string memory, uint, uint, uint, uint){
+        return (
+            ballot.archiveAddress,
+            ballot.creator,
+            ballot.ballotAddress,
+            ballot.title,
+            ballot.metainfo,
+            ballot.startTime,
+            ballot.endTime,
+            ballot.totalVotes,
+            ballot.proVotes
+        );
+    }
 }

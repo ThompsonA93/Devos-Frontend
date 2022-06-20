@@ -9,7 +9,7 @@ export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
     const [address, setAddress] = useState('');
-    const [archive, setArchive] = useState("0xE4934b4007a417e0764F08Cbcd7F1db3EA66e69E");
+    const [archive, setArchive] = useState("0xf96D2E0f246C9ED18e5D250D3C3Eb30E1C47f6Fd");
 
     const [loadTotalBallotsDB, setLoadTotalBallotsDB] = useState(false);
     const [loadSingleBallots, setLoadSingleBallots] = useState(0);
