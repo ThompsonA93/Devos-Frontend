@@ -11,8 +11,7 @@ const W3ContextProvider = (props) => {
 
     const [loadTotalBallotsDB, setLoadTotalBallotsDB] = useState(false);
     const [loadSingleBallots, setLoadSingleBallots] = useState(false);
-
-
+    const [loadedBackend, setLoadedBackend] = useState(false);
 
     // On Login
     useEffect(() => {
@@ -150,6 +149,7 @@ const W3ContextProvider = (props) => {
                             });
                             recordWriteRequest.onsuccess = async function(){
                                 console.log("Migrated Data to IDB ", recordWriteRequest.result);
+                                setLoadedBackend(true);
                             }
                         }catch(err){
                             console.log(err)
@@ -244,7 +244,7 @@ const W3ContextProvider = (props) => {
 
 
     return (
-        <W3Context.Provider value={{ address, archive, connect, setArchive, deployBallotToChain, voteYes, voteNo }}>
+        <W3Context.Provider value={{ address, archive, setArchive, loadedBackend, connect, deployBallotToChain, voteYes, voteNo }}>
             {props.children}
         </W3Context.Provider>
     )

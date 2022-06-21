@@ -25,9 +25,6 @@ const Home = () => {
               <>
                 <h2 className="subtitle">Welcome back {address}</h2>
                 <h3>Your latest Polls</h3>
-                {/*
-                <PollListUser />
-                */}
                 <PollUser />
               </>
             ) : (

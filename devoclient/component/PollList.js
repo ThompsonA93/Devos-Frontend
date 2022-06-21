@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { W3Context } from '../context/W3Context';
-import PollDetails from './PollDetails';
 
 const PollList = () => {
     const { localBallots } = useContext(W3Context);
