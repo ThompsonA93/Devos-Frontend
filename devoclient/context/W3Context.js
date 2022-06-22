@@ -9,36 +9,17 @@ const W3ContextProvider = (props) => {
     const [address, setAddress] = useState('');
     const [archive, setArchive] = useState("0xf96D2E0f246C9ED18e5D250D3C3Eb30E1C47f6Fd");
 
-    const [loadTotalBallotsDB, setLoadTotalBallotsDB] = useState(false);
-    const [loadSingleBallots, setLoadSingleBallots] = useState(false);
     const [loadedBackend, setLoadedBackend] = useState(false);
 
     // On Login
     useEffect(() => {
         if (address !== '') {
             console.log("\tW3Context::UseEffect on Address [" + address + "]\n");
-            setLoadSingleBallots(true);     // Load once
+            setLoadedBackend(true);             // Hydration 2 -- Load IDB Data to Frontend
         } else {
-            // Initial Load
-            setLoadTotalBallotsDB(true);    // Loade once
+            readBallotsFromChain();             // Hydration 1 -- Load ALL blockchain data
         }
     }, [address]);
-
-    // Update IDB-DB TotalBallots
-    useEffect(() => {
-        if (loadTotalBallotsDB) {
-            console.log("\tW3Context::UseEffect on loadTotalBallotsDB [" + loadTotalBallotsDB + "]\n");
-            readBallotsFromChain();
-        }
-    }, [loadTotalBallotsDB]);
-
-    // Update IDB-DB SingleBallots
-    useEffect(() => {
-        if (loadSingleBallots) {
-            console.log("\tW3Context::UseEffect on setLoadSingleBallots.\n");
-            convertBallotData();
-        }
-    }, [loadSingleBallots]);
 
     const connect = async () => {
         if (window.ethereum) {
@@ -105,10 +86,14 @@ const W3ContextProvider = (props) => {
                 console.log(err);
             }
         }
+        migrateBallotData();
     }
 
     // TODO Refactor this clusterfuck
-    const convertBallotData = async () => {
+    /**
+     * @dev Migrates Ballot-Information from BC to IDB
+     */
+    const migrateBallotData = async () => {
         console.log("Migrating blockchain ballot data to local storage");
         var idbOpen = indexedDB.open("DevosDB", 1);
         idbOpen.onsuccess = async function(){
@@ -143,13 +128,12 @@ const W3ContextProvider = (props) => {
                                 creator: fullBallotInformation[1],
                                 metainfo: fullBallotInformation[4],
                                 startTime: new Date(fullBallotInformation[5] * 1000).toLocaleString(),
-                                endtime: new Date(fullBallotInformation[6] * 1000).toLocaleString(),
-                                totalvotes: ""+fullBallotInformation[7],
+                                endTime: new Date(fullBallotInformation[6] * 1000).toLocaleString(),
+                                totalVotes: ""+fullBallotInformation[7],
                                 proVotes: ""+fullBallotInformation[8]                        
                             });
                             recordWriteRequest.onsuccess = async function(){
                                 console.log("Migrated Data to IDB ", recordWriteRequest.result);
-                                setLoadedBackend(true);
                             }
                         }catch(err){
                             console.log(err)
