@@ -16,7 +16,6 @@ const RemoteAPIContextProvider = (props) => {
             {props.children}
         </RemoteAPIContext.Provider>
     )
-
 }
 
 export default RemoteAPIContextProvider;

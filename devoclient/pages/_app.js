@@ -5,6 +5,7 @@ import W3ContextProvider from '../context/W3Context'
 import '../styles/globals.css'
 import 'bulma/css/bulma.css'
 import RemoteAPIContextProvider from '../context/RemoteAPIContext'
+import IDBContextProvider from '../context/IDBContext'
 
 
 function MyApp({ Component, pageProps }) {
@@ -16,13 +17,16 @@ function MyApp({ Component, pageProps }) {
           <meta name='description' content='Devos Web3-Frontend' />
         </Head>
       </div>
-      <W3ContextProvider>
+      <IDBContextProvider>
+        <W3ContextProvider>
           <RemoteAPIContextProvider>
             <Layout>
               <Component {...pageProps} />
             </Layout>
           </RemoteAPIContextProvider>
-      </W3ContextProvider>
+        </W3ContextProvider>
+      </IDBContextProvider>
+
     </>
   )
 }

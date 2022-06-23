@@ -1,16 +1,34 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ethers, BigNumber, ContractFactory } from 'ethers';
+//import { IDBContext } from './IDBContext';
+
 import ballotOpen from '../artifacts/contracts/BallotOpen.sol/BallotOpen.json';
 import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchive.json';
 
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
+    //const { idbAddressCache, initiateIDB, writeToBallotsTable, readFromBallotsTable, writeToInfoTable } = useContext(IDBContext);
+
     const [address, setAddress] = useState('');
     const [archive, setArchive] = useState("0xf96D2E0f246C9ED18e5D250D3C3Eb30E1C47f6Fd");
 
     const [loadedBackend, setLoadedBackend] = useState(false);
 
+    /**
+     * Stores Ballot Addresses (Archive)
+     */
+     const [idbAddressCache, setIDBAddressCache] = useState([]);
+
+     /**
+      * Stores Contract information (Ballots)
+      */
+     const [idbContractCache, setIDBContractCache] = useState([]);
+
+     useEffect(() => {
+        console.log("Reloading after Cache-Update", idbAddressCache, idbContractCache);
+     }, [idbAddressCache, idbContractCache]);
+     
     // On Login
     useEffect(() => {
         if (address !== '') {
@@ -18,6 +36,7 @@ const W3ContextProvider = (props) => {
             setLoadedBackend(true);             // Hydration 2 -- Load IDB Data to Frontend
         } else {
             readBallotsFromChain();             // Hydration 1 -- Load ALL blockchain data
+        //    initiateIDB();
         }
     }, [address]);
 
@@ -56,6 +75,9 @@ const W3ContextProvider = (props) => {
 
                 /****************** Indexed DB ***********************/
                 const loadIDBStart = performance.now();
+                
+                //initiateIDB();
+                //writeToBallotsTable(ballots);
 
                 var idbOpen = indexedDB.open("DevosDB", 1);
                 idbOpen.onerror = function (event) {
@@ -74,7 +96,10 @@ const W3ContextProvider = (props) => {
                     var db = idbOpen.result;
                     var transaction = db.transaction("ballots", "readwrite");
                     var store = transaction.objectStore("ballots");
-                     for (var i = 0; i < ballots.length; i++) {
+                    setIDBAddressCache(ballots);
+                    console.log("Cached addresses ", idbAddressCache);
+
+                    for (var i = 0; i < ballots.length; i++) {
                         var address = ballots[i];
                         store.put({ id: i, address: address });
                         console.log("\tStored " + address + " on local IDB.\n");
@@ -94,7 +119,8 @@ const W3ContextProvider = (props) => {
      * @dev Migrates Ballot-Information from BC to IDB
      */
     const migrateBallotData = async () => {
-        console.log("Migrating blockchain ballot data to local storage");
+        console.log("Migrating blockchain ballot data to local storage", idbAddressCache);
+       
         var idbOpen = indexedDB.open("DevosDB", 1);
         idbOpen.onsuccess = async function(){
             console.log("\tIDB-Connection Success. Reading TotalBallotAddresses");
@@ -119,10 +145,23 @@ const W3ContextProvider = (props) => {
                             );
                             const fullBallotInformation = await contract.getFullBallotInformation();
                             console.log("Received Data from Chain: " + fullBallotInformation);
+                                   
+                            /*
+                            writeToInfoTable(
+                                fullBallotInformation[2], 
+                                fullBallotInformation[3], 
+                                fullBallotInformation[1],
+                                fullBallotInformation[4],
+                                new Date(fullBallotInformation[5] * 1000).toLocaleString(),
+                                new Date(fullBallotInformation[6] * 1000).toLocaleString(),
+                                ""+fullBallotInformation[7],
+                                ""+fullBallotInformation[8]    
+                            );
+                            */
                             
                             var tx2 = db.transaction("ballotInfo", "readwrite");
                             var store2 = tx2.objectStore("ballotInfo");
-                            var recordWriteRequest = store2.put({
+                            var ballot = Object.assign({
                                 address: fullBallotInformation[2], 
                                 title: fullBallotInformation[3], 
                                 creator: fullBallotInformation[1],
@@ -132,9 +171,12 @@ const W3ContextProvider = (props) => {
                                 totalVotes: ""+fullBallotInformation[7],
                                 proVotes: ""+fullBallotInformation[8]                        
                             });
+                            setIDBContractCache(...idbContractCache, ballot);
+                            var recordWriteRequest = store2.put(ballot);
                             recordWriteRequest.onsuccess = async function(){
                                 console.log("Migrated Data to IDB ", recordWriteRequest.result);
                             }
+                            
                         }catch(err){
                             console.log(err)
                         }
@@ -142,6 +184,7 @@ const W3ContextProvider = (props) => {
                 }
             }
         }
+        console.log("IDBContractCache", idbContractCache);
     }
 
     const deployBallotToChain = async (title, metainfo, votingDays) => {
