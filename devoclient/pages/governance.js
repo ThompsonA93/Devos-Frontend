@@ -48,18 +48,8 @@ const Governance = () => {
                                 </Link>
                             </div>
                             <div className="container mt-5">
-                                <h2 className="subtitle">Total Proposals</h2>
+                                <h2 className="subtitle">Latest Proposals</h2>
                                 <PollList />
-
-                                <h2 className="subtitle">Running Proposals</h2>
-                                {/* 
-                                <PollListRunning />
-                                */}
-
-                                <h2 className="subtitle">Completed Proposals</h2>
-                                {/*
-                                    <PollListComplete />
-                                */}
                             </div>
                         </>
                     ) : (

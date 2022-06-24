@@ -12,7 +12,7 @@ const PollDetails = ({ ballot }) => {
             <dd>{ballot.totalVotes} have voted, {ballot.proVotes} voted in favor.</dd>
             <Link href={{pathname: `/proposals/[id]`, query: {id: ballot.id}}}>            
             <dd>
-                <button className='button is-link is-small is-inverted'>Vote Now!</button></dd>
+                <button className='button is-link is-small is-inverted'>View Details</button></dd>
             </Link>
         </div>
     );

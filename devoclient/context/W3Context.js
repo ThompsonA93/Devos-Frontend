@@ -8,8 +8,14 @@ import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchiv
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
-    const { initiateIDBStorages, writeToAddressArchiveTable, readFromAddressArchiveTable, writeToContractTable, readFromContractTable } = useContext(IDBContext);
+    /**
+     * IDB Interface, @see IDBContext.js
+     */
+    const { initiateIDBStorages, writeToAddressArchiveTable, readFromAddressArchiveTable, writeToContractTable, readFromContractTable, updateContractTableVotes } = useContext(IDBContext);
 
+    /**
+     * Blockchain Metadata
+     */
     const [address, setAddress] = useState('');
     const [archive, setArchive] = useState("0xf96D2E0f246C9ED18e5D250D3C3Eb30E1C47f6Fd");
 
@@ -24,32 +30,32 @@ const W3ContextProvider = (props) => {
       */
      const [idbContractCache, setIDBContractCache] = useState([]);
 
-    /*
-    useEffect(() => {
-       console.log("Reloading after Cache-Update", idbAddressCache, idbContractCache);
-    }, [idbAddressCache, idbContractCache]);
-    */
-
+    /**
+     * Awaits change on Address -- Separates phases of data loading
+     */
     useEffect(() => {
         if (address !== '') {       // If logged in, load IDB-Backend
+            console.log("W3Context::Loading from IDB to cache");
             readBallotsfromIDB();   // Hydration 2
         } else {                    // If not logged in, load blockchain-backend
+            console.log("W3Context::Loading from Chain to IDB");
             readBallotsFromChain(); // Hydration 1
         }
     }, [address]);
+
 
     //********************************************************************//
     //********************** Backend Functions ***************************//
     //********************************************************************//
     /**
-     * @dev Initiates and builds database+storage objects
+     * @dev Fetches ArchiveAddress information (and stores it via method call)
      */
     const readBallotsFromChain = async () => {
-        console.log("W3ContextProvider::readBallotsFromChain, Archive at: " + archive);
+        console.log("W3Context::Reading archive-data from " + archive);
         if (window.ethereum) {
             try {
                 /****************** Blockchain ***********************/
-                const loadContractStart = performance.now();
+                let bcPerformanceStart = performance.now();
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(
                     archive,
@@ -57,16 +63,17 @@ const W3ContextProvider = (props) => {
                     provider
                 );
                 var ballots = await contract.getAllBallots();
-                const loadContractDuration = performance.now() - loadContractStart;
-                console.log("\tReceived Ballots: " + ballots + "\n\tLoading Time: " + loadContractDuration + "ms\n");
+                const bcPerformanceEnd = performance.now() - bcPerformanceStart;
+                console.log("#1# Received Ballots: " + ballots + "\n\tLoading Time: " + bcPerformanceEnd + "ms\n");
 
                 /****************** Indexed DB ***********************/
-                const loadIDBStart = performance.now();
+                const idbPerformanceStart = performance.now();
+
                 initiateIDBStorages();
                 var writePromise = writeToAddressArchiveTable(ballots);
 
-                const loadIDBDuration = performance.now() - loadIDBStart;
-                console.log("Wrote contract information to IDB.\n\tLoading Time: " + loadIDBDuration + "ms\n");            
+                const idbPerformanceEnd = performance.now() - idbPerformanceStart;
+                console.log("#2# Wrote contract information to IDB.\n\tLoading Time: " + idbPerformanceEnd + "ms\n");            
             } catch (err) {
                 console.log(err);
             }
@@ -81,7 +88,7 @@ const W3ContextProvider = (props) => {
     const writeBallotsToIDB = async () => {
         console.log("Migrating blockchain ballot data to local storage", idbAddressCache);
         var ballotAddr = readFromAddressArchiveTable().then(async (result) => {
-            console.log("Result", result);
+            let bcPerformanceStart = performance.now();
             for(var i = 0; i < result.length; i++){
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const contract = new ethers.Contract(
@@ -91,7 +98,9 @@ const W3ContextProvider = (props) => {
                 );
                 
                 const fullBallotInformation = await contract.getFullBallotInformation();
-                console.log("Received Data from Chain: " + fullBallotInformation);
+                const bcPerformanceEnd = performance.now() - bcPerformanceStart;
+                console.log("#3# Received ContractData: " + fullBallotInformation + "\n\tLoading Time: " + bcPerformanceEnd + "ms\n");
+
                 var writePromise = writeToContractTable(
                     i,                          // ID to store as
                     fullBallotInformation[0],   // ArchiveAddress
@@ -128,30 +137,31 @@ const W3ContextProvider = (props) => {
     }
 
     const readBallotsfromIDB = () => {
+        const idbPerformanceStart = performance.now();
         readFromContractTable().then(dataSets => {
             setIDBContractCache(dataSets);
+            const idbPerformanceEnd = performance.now() - idbPerformanceStart;
+            console.log("#4# Cached contract information to IDB.", idbContractCache, "\n\tLoading Time: " + idbPerformanceEnd + "ms\n");
         });
+
     }    
 
 
 
-
-    /*
     // TODO -- Test, seems a little erratic at times
-    const updateLocalBallotVote = (id, choice) => {
-        console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
+    const updateCachedBallotVote = (id, choice) => {
+        console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + idbContractCache[id].totalVotes + "\n\t\tProVotes: " + idbContractCache[id].proVotes);
 
-        var tVotes = parseInt(localBallots[id].totalVotes);
+        var tVotes = parseInt(idbContractCache[id].totalVotes);
         tVotes += 1;
-        localBallots[id].totalVotes = tVotes.toString();
+        idbContractCache[id].totalVotes = tVotes.toString();
         if (choice === 2) {
-            var pVotes = parseInt(localBallots[id].proVotes);
+            var pVotes = parseInt(idbContractCache[id].proVotes);
             pVotes += 1;
-            localBallots[id].proVotes = pVotes.toString();
+            idbContractCache[id].proVotes = pVotes.toString();
         }
-        console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
+        console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + idbContractCache[id].totalVotes + "\n\t\tProVotes: " + idbContractCache[id].proVotes);
     }
-    */
 
 
 
@@ -185,7 +195,7 @@ const W3ContextProvider = (props) => {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = await new ethers.Contract(
-                totalSCVotums[id],
+                idbContractCache[id].address,
                 ballotOpen.abi,
                 signer
             );
@@ -193,7 +203,8 @@ const W3ContextProvider = (props) => {
             try {
                 const contractInteration = await contract.vote(BigNumber.from(2));
                 console.log("\tSubmitted Vote 'YES' on #" + id);
-                updateLocalBallotVote(id, 2);
+                updateCachedBallotVote(id, 2);
+                updateContractTableVotes(id, 2);
             } catch (err) {
                 console.log(err);
 
@@ -210,7 +221,7 @@ const W3ContextProvider = (props) => {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = await new ethers.Contract(
-                totalSCVotums[id],
+                idbContractCache[id].address,
                 ballotOpen.abi,
                 signer
             );
@@ -218,7 +229,8 @@ const W3ContextProvider = (props) => {
             try {
                 const contractInteration = await contract.vote(BigNumber.from(1));
                 console.log("\tSubmitted Vote 'NO' on #" + id);
-                updateLocalBallotVote(id, 1);
+                updateCachedBallotVote(id, 1);
+                updateContractTableVotes(id, 1);
             } catch (err) {
                 console.log(err);
             }

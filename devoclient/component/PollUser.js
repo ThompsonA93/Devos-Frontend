@@ -5,11 +5,6 @@ import PollDetails from './PollDetails';
 const PollUser = () => {
     const { idbContractCache, address } = useContext(W3Context);
 
-    useEffect(() => {
-        // Just reload on Cache-Change
-        console.log("PollUser::Reloading following idbContractCache-Chance", idbContractCache);
-    }, [idbContractCache]);
-
     return (
         <dl className='m-4'>
             {   
@@ -21,17 +16,6 @@ const PollUser = () => {
                         <></>
                     )
                 })
-            }
-            
-            {
-            /* {localBallots.map(poll => {
-                //console.log("\t\tCheck to render user ballot: \n\t" + poll.id + " || "+ poll.creator +  ":" + address);
-                return poll.creator === address ? (
-                    <PollDetails poll={poll} key={poll.id} />
-                ) : (
-                    <></>
-                )
-            })} */
             }
         </dl>
     )
