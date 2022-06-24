@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ethers, BigNumber, ContractFactory } from 'ethers';
-//import { IDBContext } from './IDBContext';
+import { IDBContext } from './IDBContext';
 
 import ballotOpen from '../artifacts/contracts/BallotOpen.sol/BallotOpen.json';
 import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchive.json';
@@ -8,15 +8,14 @@ import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchiv
 export const W3Context = createContext();
 
 const W3ContextProvider = (props) => {
-    //const { idbAddressCache, initiateIDB, writeToBallotsTable, readFromBallotsTable, writeToInfoTable } = useContext(IDBContext);
+    const { initiateIDBStorages, writeToAddressArchiveTable, readFromAddressArchiveTable, writeToContractTable, readFromContractTable } = useContext(IDBContext);
 
     const [address, setAddress] = useState('');
     const [archive, setArchive] = useState("0xf96D2E0f246C9ED18e5D250D3C3Eb30E1C47f6Fd");
 
-    const [loadedBackend, setLoadedBackend] = useState(false);
-
     /**
-     * Stores Ballot Addresses (Archive)
+     * @deprecated Stores Ballot Addresses (Archive)
+     * Is not really relevant for this demo, but may become relevant for Cross-Chain voting
      */
      const [idbAddressCache, setIDBAddressCache] = useState([]);
 
@@ -25,33 +24,23 @@ const W3ContextProvider = (props) => {
       */
      const [idbContractCache, setIDBContractCache] = useState([]);
 
-     useEffect(() => {
-        console.log("Reloading after Cache-Update", idbAddressCache, idbContractCache);
-     }, [idbAddressCache, idbContractCache]);
-     
-    // On Login
+    /*
     useEffect(() => {
-        if (address !== '') {
-            console.log("\tW3Context::UseEffect on Address [" + address + "]\n");
-            setLoadedBackend(true);             // Hydration 2 -- Load IDB Data to Frontend
-        } else {
-            readBallotsFromChain();             // Hydration 1 -- Load ALL blockchain data
-        //    initiateIDB();
+       console.log("Reloading after Cache-Update", idbAddressCache, idbContractCache);
+    }, [idbAddressCache, idbContractCache]);
+    */
+
+    useEffect(() => {
+        if (address !== '') {       // If logged in, load IDB-Backend
+            readBallotsfromIDB();   // Hydration 2
+        } else {                    // If not logged in, load blockchain-backend
+            readBallotsFromChain(); // Hydration 1
         }
     }, [address]);
 
-    const connect = async () => {
-        if (window.ethereum) {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
-            const address = ethers.utils.getAddress(accounts[0]);
-            console.log("\tUser detected: " + address);
-            setAddress(address);
-        }
-        console.log("\tChange in Address: " + address);
-    }
-
+    //********************************************************************//
+    //********************** Backend Functions ***************************//
+    //********************************************************************//
     /**
      * @dev Initiates and builds database+storage objects
      */
@@ -71,124 +60,106 @@ const W3ContextProvider = (props) => {
                 const loadContractDuration = performance.now() - loadContractStart;
                 console.log("\tReceived Ballots: " + ballots + "\n\tLoading Time: " + loadContractDuration + "ms\n");
 
-
-
                 /****************** Indexed DB ***********************/
                 const loadIDBStart = performance.now();
-                
-                //initiateIDB();
-                //writeToBallotsTable(ballots);
+                initiateIDBStorages();
+                var writePromise = writeToAddressArchiveTable(ballots);
 
-                var idbOpen = indexedDB.open("DevosDB", 1);
-                idbOpen.onerror = function (event) {
-                    console.log("IDB-Loading error: " + event);
-                }
-                idbOpen.onupgradeneeded = function () {
-                    var db = idbOpen.result;
-                    var store1 = db.createObjectStore("ballots", { keyPath: "id" });
-                    store1.createIndex("address", ["address"], {unique: true});
-                    console.log("Updated Ballots-Store");
-                    var store2 = db.createObjectStore("ballotInfo", { keyPath: "address"});
-                    store2.createIndex("title", ["title"], {unique: false});
-                    console.log("Updated BallotInfo-Store");
-                }
-                idbOpen.onsuccess = function () {
-                    var db = idbOpen.result;
-                    var transaction = db.transaction("ballots", "readwrite");
-                    var store = transaction.objectStore("ballots");
-                    setIDBAddressCache(ballots);
-                    console.log("Cached addresses ", idbAddressCache);
-
-                    for (var i = 0; i < ballots.length; i++) {
-                        var address = ballots[i];
-                        store.put({ id: i, address: address });
-                        console.log("\tStored " + address + " on local IDB.\n");
-                    }
-                }
                 const loadIDBDuration = performance.now() - loadIDBStart;
                 console.log("Wrote contract information to IDB.\n\tLoading Time: " + loadIDBDuration + "ms\n");            
             } catch (err) {
                 console.log(err);
             }
         }
-        migrateBallotData();
+        writeBallotsToIDB();
     }
 
     // TODO Refactor this clusterfuck
     /**
      * @dev Migrates Ballot-Information from BC to IDB
      */
-    const migrateBallotData = async () => {
+    const writeBallotsToIDB = async () => {
         console.log("Migrating blockchain ballot data to local storage", idbAddressCache);
-       
-        var idbOpen = indexedDB.open("DevosDB", 1);
-        idbOpen.onsuccess = async function(){
-            console.log("\tIDB-Connection Success. Reading TotalBallotAddresses");
-            var db = idbOpen.result;
-            var transaction = db.transaction("ballots", "readonly");
-            var store = transaction.objectStore("ballots");
-            var recordCountRequest = store.count();
-            recordCountRequest.onsuccess = async function(){
-                console.log("\tCounting: " + recordCountRequest.result);
-                for(var i = 0; i < recordCountRequest.result; i++){
-                    var ballotRequest = store.get(i);
-                    ballotRequest.onsuccess = async function(){
-                        console.log("\t\tFetched ", ballotRequest.result);
-                        var addr = ballotRequest.result.address;
-
-                        try{
-                            const provider = new ethers.providers.Web3Provider(window.ethereum);
-                            const contract = new ethers.Contract(
-                                addr,
-                                ballotOpen.abi,
-                                provider
-                            );
-                            const fullBallotInformation = await contract.getFullBallotInformation();
-                            console.log("Received Data from Chain: " + fullBallotInformation);
-                                   
-                            /*
-                            writeToInfoTable(
-                                fullBallotInformation[2], 
-                                fullBallotInformation[3], 
-                                fullBallotInformation[1],
-                                fullBallotInformation[4],
-                                new Date(fullBallotInformation[5] * 1000).toLocaleString(),
-                                new Date(fullBallotInformation[6] * 1000).toLocaleString(),
-                                ""+fullBallotInformation[7],
-                                ""+fullBallotInformation[8]    
-                            );
-                            */
-                            
-                            var tx2 = db.transaction("ballotInfo", "readwrite");
-                            var store2 = tx2.objectStore("ballotInfo");
-                            var ballot = Object.assign({
-                                address: fullBallotInformation[2], 
-                                title: fullBallotInformation[3], 
-                                creator: fullBallotInformation[1],
-                                metainfo: fullBallotInformation[4],
-                                startTime: new Date(fullBallotInformation[5] * 1000).toLocaleString(),
-                                endTime: new Date(fullBallotInformation[6] * 1000).toLocaleString(),
-                                totalVotes: ""+fullBallotInformation[7],
-                                proVotes: ""+fullBallotInformation[8]                        
-                            });
-                            setIDBContractCache(...idbContractCache, ballot);
-                            var recordWriteRequest = store2.put(ballot);
-                            recordWriteRequest.onsuccess = async function(){
-                                console.log("Migrated Data to IDB ", recordWriteRequest.result);
-                            }
-                            
-                        }catch(err){
-                            console.log(err)
-                        }
-                    }
-                }
+        var ballotAddr = readFromAddressArchiveTable().then(async (result) => {
+            console.log("Result", result);
+            for(var i = 0; i < result.length; i++){
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const contract = new ethers.Contract(
+                    result[i].address,
+                    ballotOpen.abi,
+                    provider
+                );
+                
+                const fullBallotInformation = await contract.getFullBallotInformation();
+                console.log("Received Data from Chain: " + fullBallotInformation);
+                var writePromise = writeToContractTable(
+                    i,                          // ID to store as
+                    fullBallotInformation[0],   // ArchiveAddress
+                    fullBallotInformation[1],   // Creator
+                    fullBallotInformation[2],   // BallotAddress
+                    fullBallotInformation[3],   // Title
+                    fullBallotInformation[4],   // Metainfo
+                    new Date(fullBallotInformation[5] * 1000).toLocaleString(), // startTime
+                    new Date(fullBallotInformation[6] * 1000).toLocaleString(), // endTime
+                    ""+fullBallotInformation[7],    // totalVotes
+                    ""+fullBallotInformation[8]     // proVotes
+                ).then(result => {
+                    // TODO do something?
+                });
             }
-        }
-        console.log("IDBContractCache", idbContractCache);
+        });
     }
 
-    const deployBallotToChain = async (title, metainfo, votingDays) => {
 
+    
+    //********************************************************************//
+    //********************** Frontend Functions **************************//
+    //********************************************************************//
+    const connect = async () => {
+        if (window.ethereum) {
+            const accounts = await window.ethereum.request({
+                method: "eth_requestAccounts",
+            });
+            const address = ethers.utils.getAddress(accounts[0]);
+            console.log("\tUser detected: " + address);
+            setAddress(address);
+        }
+        console.log("\tChange in Address: " + address);
+    }
+
+    const readBallotsfromIDB = () => {
+        readFromContractTable().then(dataSets => {
+            setIDBContractCache(dataSets);
+        });
+    }    
+
+
+
+
+    /*
+    // TODO -- Test, seems a little erratic at times
+    const updateLocalBallotVote = (id, choice) => {
+        console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
+
+        var tVotes = parseInt(localBallots[id].totalVotes);
+        tVotes += 1;
+        localBallots[id].totalVotes = tVotes.toString();
+        if (choice === 2) {
+            var pVotes = parseInt(localBallots[id].proVotes);
+            pVotes += 1;
+            localBallots[id].proVotes = pVotes.toString();
+        }
+        console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
+    }
+    */
+
+
+
+
+    //********************************************************************//
+    //*********************** Ballot Functions ***************************//
+    //********************************************************************//
+    const deployBallotToChain = async (title, metainfo, votingDays) => {
         if (window.ethereum) {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -254,24 +225,11 @@ const W3ContextProvider = (props) => {
         }
     }
 
-    // TODO -- Test, seems a little erratic at times
-    const updateLocalBallotVote = (id, choice) => {
-        console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
 
-        var tVotes = parseInt(localBallots[id].totalVotes);
-        tVotes += 1;
-        localBallots[id].totalVotes = tVotes.toString();
-        if (choice === 2) {
-            var pVotes = parseInt(localBallots[id].proVotes);
-            pVotes += 1;
-            localBallots[id].proVotes = pVotes.toString();
-        }
-        console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
-    }
 
 
     return (
-        <W3Context.Provider value={{ address, archive, setArchive, loadedBackend, connect, deployBallotToChain, voteYes, voteNo }}>
+        <W3Context.Provider value={{ address, archive, idbContractCache, setArchive, connect, deployBallotToChain, voteYes, voteNo }}>
             {props.children}
         </W3Context.Provider>
     )

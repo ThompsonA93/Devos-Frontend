@@ -7,7 +7,7 @@ const PollDetails = ({ ballot }) => {
     return (
         <div className='m-2'>
             <dt>{ballot.title}, by {ballot.creator}</dt>
-            <dd>{ballot.metainfo}</dd>
+            <dd>{ballot.metaInfo}</dd>
             <dd>Voting available until [{ballot.endTime}]</dd>
             <dd>{ballot.totalVotes} have voted, {ballot.proVotes} voted in favor.</dd>
             <Link href={{pathname: `/proposals/[id]`, query: {id: ballot.id}}}>            

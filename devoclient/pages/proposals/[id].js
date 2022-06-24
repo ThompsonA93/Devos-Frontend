@@ -3,11 +3,11 @@ import { useRouter } from 'next/router';
 import { W3Context } from '../../context/W3Context';
 
 const Proposal = () => {
-    const { localBallots, voteYes, voteNo } = useContext(W3Context);
+    const { idbContractCache, voteYes, voteNo } = useContext(W3Context);
     const router = useRouter();
 
     return (
-        localBallots.map(poll => {
+        idbContractCache.map(poll => {
             if (poll.id == router.query.id) {
                 console.log("Rendering Ballot" + poll.id + " - " + poll.title);
                 return (
@@ -23,7 +23,7 @@ const Proposal = () => {
                             <h1 className="title">{poll.title}</h1>
                             <h2 className="subtitle">by {poll.creator}</h2>
                             <div className='section'>
-                                {poll.metainfo}
+                                {poll.metaInfo}
                                 <div className='mt-5'>Voting ends on {poll.endDate} days</div>
                             </div>
                             <div className="field is-grouped">
