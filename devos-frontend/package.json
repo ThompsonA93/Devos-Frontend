@@ -14,7 +14,7 @@
     "start": "next start",
     "lint": "next lint",
     "prettier": "prettier --write .",
-    "prepare": "cd .. && npx husky install"
+    "husky": "cd .. && npx husky install"
   },
   "dependencies": {
     "next": "12.3.0",
