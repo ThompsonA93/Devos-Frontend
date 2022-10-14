@@ -1,10 +1,10 @@
 import Link from 'next/link';
 
 import { useContext, useState } from 'react';
-import { W3Context } from '../../context/W3Context';
+import { DataContext } from '../../context/DataContext';
 
 const Navbar = () => {
-  const { address, connect } = useContext(W3Context);
+  const { address, connect } = useContext(DataContext);
 
   return (
     <nav className="navbar is-dark">
@@ -32,6 +32,7 @@ const Navbar = () => {
               <a
                 href={`https://rinkeby.etherscan.io/address/${address}`}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="button is-white"
               >
                 {address}

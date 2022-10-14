@@ -1,8 +1,9 @@
 import React, { createContext, useState } from 'react';
+import { ethers } from 'ethers';
 
-export const W3Context = createContext();
+export const DataContext = createContext();
 
-const W3ContextProvider = (props) => {
+const DataContextProvider = (props) => {
   const [address, setAddress] = useState('');
 
   const connect = async () => {
@@ -18,10 +19,10 @@ const W3ContextProvider = (props) => {
   };
 
   return (
-    <W3Context.Provider value={{ address, connect }}>
+    <DataContext.Provider value={{ address, connect }}>
       {props.children}
-    </W3Context.Provider>
+    </DataContext.Provider>
   );
 };
 
-export default W3ContextProvider;
+export default DataContextProvider;

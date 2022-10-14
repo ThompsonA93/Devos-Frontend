@@ -7,7 +7,7 @@ import Layout from '../components/layout/PrimaryLayout';
 import Footer from '../components/navigation/Footer';
 import Navbar from '../components/navigation/Navbar';
 
-Index.getLayout = function getLayout(page) {
+Proposals.getLayout = function getLayout(page) {
   return (
     <Layout>
       <Navbar />
@@ -17,31 +17,30 @@ Index.getLayout = function getLayout(page) {
   );
 };
 
-export default function Index() {
+export default function Proposals() {
   const { address } = useContext(DataContext);
 
   return (
     <div>
       <section className="hero is-small has-background-grey">
         <div className="hero-body">
-          <p className="title has-text-white">Home</p>
+          <p className="title has-text-white">Proposals</p>
         </div>
       </section>
       <div className="container">
         <section className="section">
           {address !== '' ? (
             <>
-              <h2 className="subtitle">Welcome back {address}</h2>
-              <h3>Your latest Polls</h3>
+              <h2 className="subtitle">Overview of all proposals</h2>
+              <h3>Current Proposals</h3>
+              asdf
+              <h3>Finished Proposals</h3>
+              ghjk
             </>
           ) : (
             <>
-              <h2 className="subtitle">Welcome back</h2>
-              <p>Please login to MetaMask to use DeVoS.</p>
-              <p>
-                If it is your first time using DeVoS,{' '}
-                <Link href="/help">follow this link</Link>
-              </p>
+              <h2 className="subtitle">Overview of all proposals</h2>
+              <div>Please login to MetaMask to use DeVoS.</div>
             </>
           )}
         </section>

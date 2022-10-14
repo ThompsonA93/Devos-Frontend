@@ -18,6 +18,7 @@ const Footer = () => {
                 <a
                   href="https://github.com/ThompsonA93/DevoClient"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {' '}
                   DeVoS Client{' '}
@@ -27,6 +28,7 @@ const Footer = () => {
                 <a
                   href="https://github.com/ThompsonA93/DevoServ"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {' '}
                   DeVoS Server{' '}
@@ -36,6 +38,7 @@ const Footer = () => {
                 <a
                   href="https://github.com/ThompsonA93/DevoChain"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {' '}
                   DeVoS Blockchain{' '}
@@ -49,19 +52,31 @@ const Footer = () => {
             <h3>Links</h3>
             <dl>
               <dt>
-                <a href="https://nextjs.org/" target="_blank">
+                <a
+                  href="https://nextjs.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {' '}
                   NextJS{' '}
                 </a>
               </dt>
               <dt>
-                <a href="https://hardhat.org/" target="_blank">
+                <a
+                  href="https://hardhat.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {' '}
                   HardHat{' '}
                 </a>
               </dt>
               <dt>
-                <a href="https://ethereum.org/en/" target="_blank">
+                <a
+                  href="https://ethereum.org/en/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {' '}
                   Ethereum{' '}
                 </a>
