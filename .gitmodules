@@ -1,0 +1,3 @@
+[submodule "devos-contracts"]
+	path = devos-contracts
+	url = https://github.com/ThompsonA93/Devos-Contracts.git

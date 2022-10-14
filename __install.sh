@@ -12,7 +12,7 @@ else
     fi
 fi
 
-printf "\n! Install project requirements? [Y/n]\n"
+printf "! Install project requirements? [Y/n]\n"
 read input
 if [[ $input =~ "Y" ]]; then
     printf "\n! Installing supportive tools: Aptitude, GCC, G++, Make.\n"
@@ -24,7 +24,7 @@ if [[ $input =~ "Y" ]]; then
     sudo npm install --global yarn
 fi
 
-printf "\n! Installed/Using the following versions\n"
+printf "! Using the following versions\n"
 printf "\tNode Version: $(node --version)\n"
 printf "\tNpm Version: $(npm --version)\n"
 printf "\tYarn Version: $(yarn --version)\n"
@@ -35,4 +35,12 @@ if [[ $input =~ "Y" ]]; then
     yarn install
     yarn husky
 fi
+
+printf "! Instantiate Submodules? [Y/n]\n"
+read input
+if [[ $input =~ "Y" ]]; then
+    git submodule update --init
+fi
+
+
 printf "! Script complete \n\n"
