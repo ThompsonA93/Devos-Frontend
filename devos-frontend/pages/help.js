@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import Link from 'next/link';
 
+import Image from 'next/image';
 import { DataContext } from '../context/DataContext';
 
 import Layout from '../components/layout/PrimaryLayout';
@@ -46,10 +47,10 @@ export default function Help() {
             First, you need to install MetaMask, a Browser-Plugin that allows
             you to connect to blockchain systems.
           </p>
-          <a href="https://metamask.io/" target="_blank">
+          <a href="https://metamask.io/" target="_blank" rel="noreferrer">
             <div className="box">
               <figure className="image is-3by1">
-                <img src="MetaMask.svg" />
+                <Image src="/MetaMask.svg" alt="MetaMask.svg" layout="fill" />
                 Download MetaMask now!
               </figure>
             </div>
@@ -69,26 +70,42 @@ export default function Help() {
           <div className="columns m-5">
             <div className="column is-one-quarter">
               <figure className="image">
-                <img src="MetaMask_Setup00.png" />
-                1. Select 'Ethereum Mainnet'
+                <Image
+                  src="/MetaMask_Setup00.png"
+                  alt="MetaMask_Setup00.png"
+                  layout="fill"
+                />
+                1. Select `&apos;`Ethereum Mainnet`&apos;`
               </figure>
             </div>
             <div className="column is-one-quarter">
               <figure className="image">
-                <img src="MetaMask_Setup01.png" />
+                <Image
+                  src="/MetaMask_Setup01.png"
+                  alt="MetaMask_Setup01.png"
+                  layout="fill"
+                />
                 2. Show/Hide test networks
               </figure>
             </div>
             <div className="column is-one-quarter">
               <figure className="image">
-                <img src="MetaMask_Setup02.png" />
+                <Image
+                  src="/MetaMask_Setup02.png"
+                  alt="MetaMask_Setup02.png"
+                  layout="fill"
+                />
                 3. Show test networks
               </figure>
             </div>
             <div className="column is-one-quarter">
               <figure className="image">
-                <img src="MetaMask_Setup03.png" />
-                4. Select 'Rinkeby Network'
+                <Image
+                  src="/MetaMask_Setup03.png"
+                  alt="MetaMask_Setup03.png"
+                  layout="fill"
+                />
+                4. Select `&apos;`Rinkeby Network`&apos;`
               </figure>
             </div>
           </div>
