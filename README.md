@@ -26,5 +26,3 @@
 ## Installation & Execution
 
 Refer to 'install.sh' and 'run.sh' respectively
-
-##
