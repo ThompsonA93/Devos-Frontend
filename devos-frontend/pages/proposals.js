@@ -6,6 +6,7 @@ import { DataContext } from '../context/DataContext';
 import Layout from '../components/layout/PrimaryLayout';
 import Footer from '../components/navigation/Footer';
 import Navbar from '../components/navigation/Navbar';
+import PollList from '../components/page/PollList';
 
 Proposals.getLayout = function getLayout(page) {
   return (
@@ -33,9 +34,7 @@ export default function Proposals() {
             <>
               <h2 className="subtitle">Overview of all proposals</h2>
               <h3>Current Proposals</h3>
-              asdf
-              <h3>Finished Proposals</h3>
-              ghjk
+              <PollList />
             </>
           ) : (
             <>

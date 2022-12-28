@@ -6,6 +6,7 @@ import { DataContext } from '../context/DataContext';
 import Layout from '../components/layout/PrimaryLayout';
 import Footer from '../components/navigation/Footer';
 import Navbar from '../components/navigation/Navbar';
+import UserPoll from '../components/page/UserPoll';
 
 Index.getLayout = function getLayout(page) {
   return (
@@ -33,6 +34,7 @@ export default function Index() {
             <>
               <h2 className="subtitle">Welcome back {address}</h2>
               <h3>Your latest Polls</h3>
+              <UserPoll />
             </>
           ) : (
             <>

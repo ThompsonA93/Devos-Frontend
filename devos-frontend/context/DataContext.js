@@ -259,6 +259,30 @@ const DataContextProvider = (props) => {
     });
   }
 
+  const deployBallotToChain = async (title, metainfo, votingDays) => {
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const scFactory = new ContractFactory(
+        ballotOpen.abi,
+        ballotOpen.bytecode,
+        signer
+      );
+
+      try {
+        const contract = await scFactory.deploy(
+          archive,
+          title,
+          metainfo,
+          BigNumber.from(votingDays)
+        );
+        console.log('\tDeployed to Address: ' + contract.address);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
   const voteYes = async (id) => {
     console.log('\tCalling Yes on Ballot #' + id);
     if (window.ethereum) {
@@ -304,7 +328,14 @@ const DataContextProvider = (props) => {
 
   return (
     <DataContext.Provider
-      value={{ address, idbContractCache, connect, voteYes, voteNo }}
+      value={{
+        address,
+        idbContractCache,
+        connect,
+        voteYes,
+        voteNo,
+        deployBallotToChain,
+      }}
     >
       {props.children}
     </DataContext.Provider>

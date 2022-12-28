@@ -1,6 +1,7 @@
 import Layout from '../../components/layout/PrimaryLayout';
 import Footer from '../../components/navigation/Footer';
 import Navbar from '../../components/navigation/Navbar';
+import BallotForm from '../../components/page/BallotForm';
 
 newProposal.getLayout = function getLayout(page) {
   return (
@@ -20,7 +21,9 @@ export default function newProposal() {
           <p className="title has-text-white">Create a new Proposal</p>
         </div>
       </section>
-      <div className="container">asdf</div>
+      <div className="container">
+        <BallotForm />
+      </div>
     </div>
   );
 }
