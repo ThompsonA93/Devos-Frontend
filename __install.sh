@@ -16,7 +16,7 @@ printf "! Install project requirements? [Y/n]\n"
 read input
 if [[ $input =~ "Y" ]]; then
     printf "\n! Installing supportive tools: Aptitude, GCC, G++, Make.\n"
-    sudo apt-get install aptitude
+    sudo apt-get install aptitude wget
     sudo aptitude install gcc g++ make 
 
     printf "\n! Installing NPM & dependencies: NPM, Yarn\n"
@@ -35,12 +35,5 @@ if [[ $input =~ "Y" ]]; then
     yarn install
     yarn husky
 fi
-
-printf "! Instantiate Submodules? [Y/n]\n"
-read input
-if [[ $input =~ "Y" ]]; then
-    git submodule update --init
-fi
-
 
 printf "! Script complete \n\n"

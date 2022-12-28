@@ -1,15 +1,15 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import { ethers, BigNumber, ContractFactory } from 'ethers';
 
-import ballotOpen from '../contracts/BallotOpen.sol/BallotOpen.json';
-import ballotArchive from '../contracts/BallotArchive.sol/BallotArchive.json';
+import ballotOpen from '../artifacts/contracts/BallotOpen.sol/BallotOpen.json';
+import ballotArchive from '../artifacts/contracts/BallotArchive.sol/BallotArchive.json';
 
 export const DataContext = createContext();
 
 const DataContextProvider = (props) => {
   const [address, setAddress] = useState('');
   const [archive, setArchive] = useState(
-    '0xE9B505Cab014F0b32F2f4138cd3e8B5F237978e8'
+    '0x67299F7a686a3E4eBfC79Ea7d8B5782Cc729a060'
   );
 
   /**
@@ -39,9 +39,18 @@ const DataContextProvider = (props) => {
     }
   }, [address]);
 
-  //********************************************************************//
-  //********************** Backend Functions ***************************//
-  //********************************************************************//
+  const connect = async () => {
+    if (window.ethereum) {
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts',
+      });
+      const address = ethers.utils.getAddress(accounts[0]);
+      console.log('\tUser detected: ' + address);
+      setAddress(address);
+    }
+    console.log('\tChange in Address: ' + address);
+  };
+
   /**
    * @dev Initiates and builds database+storage objects
    */
@@ -87,154 +96,6 @@ const DataContextProvider = (props) => {
     writeBallotsToIDB();
   };
 
-  // TODO Refactor this clusterfuck
-  /**
-   * @dev Migrates Ballot-Information from BC to IDB
-   */
-  const writeBallotsToIDB = async () => {
-    console.log(
-      'Migrating blockchain ballot data to local storage',
-      idbAddressCache
-    );
-    var ballotAddr = readFromAddressArchiveTable().then(async (result) => {
-      console.log('Result', result);
-      for (var i = 0; i < result.length; i++) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(
-          result[i].address,
-          ballotOpen.abi,
-          provider
-        );
-
-        const fullBallotInformation = await contract.getFullBallotInformation();
-        console.log('Received Data from Chain: ' + fullBallotInformation);
-        var writePromise = writeToContractTable(
-          i, // ID to store as
-          fullBallotInformation[0], // ArchiveAddress
-          fullBallotInformation[1], // Creator
-          fullBallotInformation[2], // BallotAddress
-          fullBallotInformation[3], // Title
-          fullBallotInformation[4], // Metainfo
-          new Date(fullBallotInformation[5] * 1000).toLocaleString(), // startTime
-          new Date(fullBallotInformation[6] * 1000).toLocaleString(), // endTime
-          '' + fullBallotInformation[7], // totalVotes
-          '' + fullBallotInformation[8] // proVotes
-        ).then((result) => {
-          // TODO do something?
-        });
-      }
-    });
-  };
-
-  //********************************************************************//
-  //********************** Frontend Functions **************************//
-  //********************************************************************//
-  const connect = async () => {
-    if (window.ethereum) {
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      });
-      const address = ethers.utils.getAddress(accounts[0]);
-      console.log('\tUser detected: ' + address);
-      setAddress(address);
-    }
-    console.log('\tChange in Address: ' + address);
-  };
-
-  const readBallotsfromIDB = () => {
-    readFromContractTable().then((dataSets) => {
-      setIDBContractCache(dataSets);
-    });
-  };
-
-  /*
-  // TODO -- Test, seems a little erratic at times
-  const updateLocalBallotVote = (id, choice) => {
-      console.log("\tUpdating local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
-
-      var tVotes = parseInt(localBallots[id].totalVotes);
-      tVotes += 1;
-      localBallots[id].totalVotes = tVotes.toString();
-      if (choice === 2) {
-          var pVotes = parseInt(localBallots[id].proVotes);
-          pVotes += 1;
-          localBallots[id].proVotes = pVotes.toString();
-      }
-      console.log("\tUpdated local Ballot #" + id + "\n\t\tTotalVotes: " + localBallots[id].totalVotes + "\n\t\tProVotes: " + localBallots[id].proVotes);
-  }
-  */
-
-  //********************************************************************//
-  //*********************** Ballot Functions ***************************//
-  //********************************************************************//
-  const deployBallotToChain = async (title, metainfo, votingDays) => {
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const scFactory = new ContractFactory(
-        ballotOpen.abi,
-        ballotOpen.bytecode,
-        signer
-      );
-
-      try {
-        const contract = await scFactory.deploy(
-          archive,
-          title,
-          metainfo,
-          BigNumber.from(votingDays)
-        );
-        console.log('\tDeployed to Address: ' + contract.address);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
-  const voteYes = async (id) => {
-    console.log('\tCalling Yes on Ballot #' + id);
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = await new ethers.Contract(
-        totalSCVotums[id],
-        ballotOpen.abi,
-        signer
-      );
-
-      try {
-        const contractInteration = await contract.vote(BigNumber.from(2));
-        console.log("\tSubmitted Vote 'YES' on #" + id);
-        updateLocalBallotVote(id, 2);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
-  const voteNo = async (id) => {
-    console.log('\tCalling No on Ballot #' + id);
-
-    if (window.ethereum) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = await new ethers.Contract(
-        totalSCVotums[id],
-        ballotOpen.abi,
-        signer
-      );
-
-      try {
-        const contractInteration = await contract.vote(BigNumber.from(1));
-        console.log("\tSubmitted Vote 'NO' on #" + id);
-        updateLocalBallotVote(id, 1);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  };
-
-  /** IDB **/
   /**
    * Initiates the data storages for the IDB
    */
@@ -302,28 +163,6 @@ const DataContextProvider = (props) => {
   }
 
   /**
-   * @returns data of the smart contracts from the table containing all smart contract information
-   */
-  function readFromContractTable() {
-    return new Promise(function (resolve, reject) {
-      var idbOpen = indexedDB.open('DevosDB', 1);
-      idbOpen.onsuccess = function (event) {
-        //var db = idbOpen.result;
-        var db = event.target.result;
-        var transaction = db.transaction('ballotInfo', 'readonly');
-        var store = transaction.objectStore('ballotInfo');
-        var ballotRequest = store.getAll();
-        ballotRequest.onsuccess = function (event) {
-          if (ballotRequest.result) {
-            console.log('IDB::Read Contract-Data', ballotRequest.result);
-            resolve(ballotRequest.result);
-          } else reject(Error('No Objects received'));
-        };
-      };
-    });
-  }
-
-  /**
    * Writes smart contract metainformation to ballotInfo
    * @param  {...any} records as previously fetched smart contract information (@see W3Context.migrateBallotData)
    * @returns
@@ -356,8 +195,117 @@ const DataContextProvider = (props) => {
     });
   }
 
+  // TODO Refactor this clusterfuck
+  /**
+   * @dev Migrates Ballot-Information from BC to IDB
+   */
+  const writeBallotsToIDB = async () => {
+    console.log('Migrating blockchain ballot data to local storage');
+    var ballotAddr = readFromAddressArchiveTable().then(async (result) => {
+      console.log('Result', result);
+      for (var i = 0; i < result.length; i++) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(
+          result[i].address,
+          ballotOpen.abi,
+          provider
+        );
+
+        const fullBallotInformation = await contract.getFullBallotInformation();
+        console.log('Received Data from Chain: ' + fullBallotInformation);
+        var writePromise = writeToContractTable(
+          i, // ID to store as
+          fullBallotInformation[0], // ArchiveAddress
+          fullBallotInformation[1], // Creator
+          fullBallotInformation[2], // BallotAddress
+          fullBallotInformation[3], // Title
+          fullBallotInformation[4], // Metainfo
+          new Date(fullBallotInformation[5] * 1000).toLocaleString(), // startTime
+          new Date(fullBallotInformation[6] * 1000).toLocaleString(), // endTime
+          '' + fullBallotInformation[7], // totalVotes
+          '' + fullBallotInformation[8] // proVotes
+        ).then((result) => {
+          // TODO do something?
+        });
+      }
+    });
+  };
+
+  const readBallotsfromIDB = () => {
+    readFromContractTable().then((dataSets) => {
+      setIDBContractCache(dataSets);
+    });
+  };
+
+  /**
+   * @returns data of the smart contracts from the table containing all smart contract information
+   */
+  function readFromContractTable() {
+    return new Promise(function (resolve, reject) {
+      var idbOpen = indexedDB.open('DevosDB', 1);
+      idbOpen.onsuccess = function (event) {
+        //var db = idbOpen.result;
+        var db = event.target.result;
+        var transaction = db.transaction('ballotInfo', 'readonly');
+        var store = transaction.objectStore('ballotInfo');
+        var ballotRequest = store.getAll();
+        ballotRequest.onsuccess = function (event) {
+          if (ballotRequest.result) {
+            console.log('IDB::Read Contract-Data', ballotRequest.result);
+            resolve(ballotRequest.result);
+          } else reject(Error('No Objects received'));
+        };
+      };
+    });
+  }
+
+  const voteYes = async (id) => {
+    console.log('\tCalling Yes on Ballot #' + id);
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = await new ethers.Contract(
+        totalSCVotums[id],
+        ballotOpen.abi,
+        signer
+      );
+
+      try {
+        const contractInteration = await contract.vote(BigNumber.from(2));
+        console.log("\tSubmitted Vote 'YES' on #" + id);
+        updateLocalBallotVote(id, 2);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  const voteNo = async (id) => {
+    console.log('\tCalling No on Ballot #' + id);
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = await new ethers.Contract(
+        totalSCVotums[id],
+        ballotOpen.abi,
+        signer
+      );
+
+      try {
+        const contractInteration = await contract.vote(BigNumber.from(1));
+        console.log("\tSubmitted Vote 'NO' on #" + id);
+        updateLocalBallotVote(id, 1);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
   return (
-    <DataContext.Provider value={{ address, connect }}>
+    <DataContext.Provider
+      value={{ address, idbContractCache, connect, voteYes, voteNo }}
+    >
       {props.children}
     </DataContext.Provider>
   );
