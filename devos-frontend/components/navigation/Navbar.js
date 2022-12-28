@@ -30,7 +30,7 @@ const Navbar = () => {
           <div className="navbar-item">
             <p className="control">
               <a
-                href={`https://rinkeby.etherscan.io/address/${address}`}
+                href={`https://sepolia.etherscan.io//address/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="button is-white"

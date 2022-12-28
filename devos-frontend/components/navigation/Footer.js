@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="column is-one-third">
           <section className="m-5">
             <p>Build 0.10</p>
-            <p>Dev. 2021-2022</p>
+            <p>Dev. 2021-2023</p>
           </section>
         </div>
         <div className="column is-one-third">
