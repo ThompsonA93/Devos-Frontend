@@ -9,8 +9,8 @@
     "npm": "please-use-yarn"
   },
   "scripts": {
-    "preinstall": "mkdir -p contracts; wget -O contracts/BallotArchive.sol https://raw.githubusercontent.com/ThompsonA93/Devos-Contracts/main/contracts/BallotArchive.sol; wget -O contracts/BallotOpen.sol https://raw.githubusercontent.com/ThompsonA93/Devos-Contracts/main/contracts/BallotOpen.sol",
-    "postinstall": "yarn hardhat compile",
+    "refresh-contracts": "mkdir -p contracts; wget -O contracts/BallotArchive.sol https://raw.githubusercontent.com/ThompsonA93/Devos-Contracts/main/contracts/BallotArchive.sol; wget -O contracts/BallotOpen.sol https://raw.githubusercontent.com/ThompsonA93/Devos-Contracts/main/contracts/BallotOpen.sol",
+    "compile-contracts": "yarn hardhat compile",
     "dev": "cross-env NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "start": "next start",
