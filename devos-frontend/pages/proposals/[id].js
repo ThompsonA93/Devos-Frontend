@@ -1,8 +1,6 @@
 import { useContext } from 'react';
 import { useRouter } from 'next/router';
 
-import Link from 'next/link';
-
 import { DataContext } from '../../context/DataContext';
 
 import Layout from '../../components/layout/PrimaryLayout';
@@ -27,7 +25,7 @@ export default function Proposal() {
     if (poll.id == router.query.id) {
       console.log('Rendering Ballot' + poll.id + ' - ' + poll.title);
       return (
-        <div>
+        <div key={poll.id}>
           <section className="hero is-small has-background-grey">
             <div className="hero-body">
               <p className="title has-text-white">Proposal #{poll.id}</p>

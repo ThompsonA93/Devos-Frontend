@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import { DataContext } from '../../context/DataContext';
 
 const Navbar = () => {

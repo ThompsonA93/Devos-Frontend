@@ -1,8 +1,4 @@
-import { useContext } from 'react';
-import Link from 'next/link';
-
 import Image from 'next/image';
-import { DataContext } from '../context/DataContext';
 
 import Layout from '../components/layout/PrimaryLayout';
 import Footer from '../components/navigation/Footer';

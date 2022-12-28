@@ -1,6 +1,3 @@
-import { useContext } from 'react';
-import Link from 'next/link';
-
 import Layout from '../components/layout/PrimaryLayout';
 import Footer from '../components/navigation/Footer';
 import Navbar from '../components/navigation/Navbar';
