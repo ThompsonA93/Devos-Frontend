@@ -115,21 +115,26 @@ export default function Help() {
           <h3 className="is-size-4 m-2">4. Request Ethereum Tokens</h3>
           <p className="m-3">
             In order to vote on DeVoS, you require some of the networks native
-            Tokens - Ethereum.
+            Tokens - Sepolia Ethereum.
           </p>
           <p className="m-3">
-            For the Sepolia test network, you can use one of the following
-            faucets:
+            For the Sepolia test network, you can use a public faucets to
+            receive tokens or run PoW-Algorithms to earn the tokens. Please be
+            aware that faucet locations may change over time, hence it may be
+            better to explicitely search on the WWW for any public sepoliaETH
+            faucets.
           </p>
           <li>
-            The Chainlink-Faucet:{' '}
-            <a href="https://faucets.chain.link/">
-              https://faucets.chain.link/
+            Faucet:{' '}
+            <a href="https://faucet.triangleplatform.com/ethereum/sepolia">
+              https://faucet.triangleplatform.com/ethereum/sepolia
             </a>
           </li>
           <li>
-            The Alchemy-Faucet:{' '}
-            <a href="https://rinkebyfaucet.com/">https://rinkebyfaucet.com/</a>
+            Proof-of-work interface:{' '}
+            <a href="https://sepolia-faucet.pk910.de/">
+              https://sepolia-faucet.pk910.de/
+            </a>
           </li>
           <h3 className="is-size-4 m-2">5. Use the DeVoS-System</h3>
           <p className="m-3">
