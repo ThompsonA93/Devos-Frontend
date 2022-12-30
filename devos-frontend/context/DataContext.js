@@ -272,6 +272,7 @@ const DataContextProvider = (props) => {
           BigNumber.from(votingDays)
         );
         console.log('\tDeployed to Address: ' + contract.address);
+        ballotFormExportToIDB(contract.address);
       } catch (err) {
         console.log(err);
       }
@@ -284,7 +285,7 @@ const DataContextProvider = (props) => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = await new ethers.Contract(
-        totalSCVotums[id],
+        idbContractCache[id].address,
         ballotOpen.abi,
         signer
       );
@@ -292,7 +293,9 @@ const DataContextProvider = (props) => {
       try {
         const contractInteration = await contract.vote(BigNumber.from(2));
         console.log("\tSubmitted Vote 'YES' on #" + id);
-        updateLocalBallotVote(id, 2);
+        idbContractCache[id].totalVotes = +idbContractCache[id].totalVotes + 1;
+        idbContractCache[id].proVotes = +idbContractCache[id].proVotes + 1;
+        updateLocalBallotVote(idbContractCache[id]);
       } catch (err) {
         console.log(err);
       }
@@ -306,7 +309,7 @@ const DataContextProvider = (props) => {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = await new ethers.Contract(
-        totalSCVotums[id],
+        idbContractCache[id].address,
         ballotOpen.abi,
         signer
       );
@@ -314,11 +317,54 @@ const DataContextProvider = (props) => {
       try {
         const contractInteration = await contract.vote(BigNumber.from(1));
         console.log("\tSubmitted Vote 'NO' on #" + id);
-        updateLocalBallotVote(id, 1);
+        // Otherwise value ends up being 012345 ...
+        idbContractCache[id].totalVotes = +idbContractCache[id].totalVotes + 1;
+        updateLocalBallotVote(idbContractCache[id]);
       } catch (err) {
         console.log(err);
       }
     }
+  };
+
+  const ballotFormExportToIDB = async (ballotAddress) => {
+    const contract = new ethers.Contract(
+      ballotAddress,
+      ballotOpen.abi,
+      provider
+    );
+    const fullBallotInformation = await contract.getFullBallotInformation();
+    console.log('Received Data from Chain: ' + fullBallotInformation);
+    var writePromise = writeToContractTable(
+      i, // ID to store as
+      fullBallotInformation[0], // ArchiveAddress
+      fullBallotInformation[1], // Creator
+      fullBallotInformation[2], // BallotAddress
+      fullBallotInformation[3], // Title
+      fullBallotInformation[4], // Metainfo
+      new Date(fullBallotInformation[5] * 1000).toLocaleString(), // startTime
+      new Date(fullBallotInformation[6] * 1000).toLocaleString(), // endTime
+      '' + fullBallotInformation[7], // totalVotes
+      '' + fullBallotInformation[8] // proVotes
+    ).then((result) => {
+      // TODO do something?
+    });
+  };
+
+  /**
+   * @param {*} recordObject as full database entry
+   */
+  const updateLocalBallotVote = async (recordObject) => {
+    console.log('Updating local ballot information');
+    var idbOpen = indexedDB.open('DevosDB', 1);
+    idbOpen.onsuccess = function (event) {
+      var db = event.target.result;
+      var tx = db.transaction('ballotInfo', 'readwrite');
+      var store = tx.objectStore('ballotInfo');
+      var recordWriteRequest = store.put(recordObject);
+      recordWriteRequest.onsuccess = function (event) {
+        console.log('IDB::Updated contract-data', event.target.result);
+      };
+    };
   };
 
   return (
