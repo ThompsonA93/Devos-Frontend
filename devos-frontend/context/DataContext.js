@@ -11,12 +11,7 @@ const DataContextProvider = (props) => {
   const [archive, setArchive] = useState(
     '0x67299F7a686a3E4eBfC79Ea7d8B5782Cc729a060'
   );
-
-  /**
-   * @deprecated Stores Ballot Addresses (Archive)
-   * Is not really relevant for this demo, but may become relevant for Cross-Chain voting
-   */
-  const [idbAddressCache, setIDBAddressCache] = useState([]);
+  const [iDB, setiDB] = useState(false);
 
   /**
    * Stores Contract information (Ballots)
@@ -33,11 +28,13 @@ const DataContextProvider = (props) => {
     if (address !== '') {
       // If logged in, load IDB-Backend
       readBallotsfromIDB(); // Hydration 2
-    } else {
+    } else if (address === '' && iDB) {
       // If not logged in, load blockchain-backend
       readBallotsFromChain(); // Hydration 1
+    } else {
+      initiateIDBStorages(); // Initialize
     }
-  }, [address]);
+  }, [address, iDB]);
 
   const connect = async () => {
     if (window.ethereum) {
@@ -55,9 +52,7 @@ const DataContextProvider = (props) => {
    * @dev Initiates and builds database+storage objects
    */
   const readBallotsFromChain = async () => {
-    console.log(
-      'W3ContextProvider::readBallotsFromChain, Archive at: ' + archive
-    );
+    console.log('DataContext::readBallotsFromChain, Archive at: ' + archive);
     if (window.ethereum) {
       try {
         /****************** Blockchain ***********************/
@@ -80,7 +75,6 @@ const DataContextProvider = (props) => {
 
         /****************** Indexed DB ***********************/
         const loadIDBStart = performance.now();
-        initiateIDBStorages();
         var writePromise = writeToAddressArchiveTable(ballots);
 
         const loadIDBDuration = performance.now() - loadIDBStart;
@@ -110,6 +104,7 @@ const DataContextProvider = (props) => {
       store2.createIndex('address', ['address'], { unique: true });
       store2.createIndex('title', ['title'], { unique: false });
       console.log('IDB::Updated BallotInfo-Store');
+      setiDB(true);
     };
   }
 
