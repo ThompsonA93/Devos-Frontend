@@ -141,6 +141,12 @@ export default function Help() {
             After receiving some Ethereum on the Sepolia network, you can freely
             route through the webpage and commence voting.
           </p>
+
+          <h3 className="is-size-4 m-2">6. Provide Feedback</h3>
+          <p className="m-3">
+            Once you have tested the application, be invited to fill out the
+            form at <a href="https://forms.gle/NCC254rQN6YgZRS59">this page</a>.
+          </p>
         </section>
       </div>
     </div>

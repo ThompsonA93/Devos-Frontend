@@ -64,7 +64,12 @@ export default function Governance() {
           </>
         ) : (
           <>
+            <h2 className="subtitle">Welcome back</h2>
             <h3>Please login to MetaMask to use DeVoS.</h3>
+            <p>
+              If it is your first time using DeVoS,{' '}
+              <Link href="/help">follow this link</Link>
+            </p>
           </>
         )}
       </div>
